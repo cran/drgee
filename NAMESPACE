@@ -1,0 +1,15 @@
+importFrom("stats", glm.fit, model.matrix, terms, printCoefmat)
+importFrom("nleqslv", nleqslv)
+
+export(drgee, coef.drgee, vcov.drgee, print.drgee, summary.drgee,
+       print.summary.drgee, drgeeData, summary.drgeeData,
+       print.summary.drgeeData, obeFit, ebeFit, drFit, geeFit, findRoots, robVcov)
+
+S3method(coef, drgee)
+S3method(vcov, drgee)
+S3method(summary, drgee)
+S3method(print, drgee)
+S3method(summary, drgee)
+S3method(print, summary.drgee)
+S3method(summary, drgeeData)
+S3method(print, summary.drgeeData)
