@@ -61,8 +61,8 @@ function(object, rootFinder=findRoots, ...){
                       list(...))
 
         # call equation solver with beta.init as initial guess and eq.func as estimation function
-   	root.object <- do.call(rootFinder, all.args)
-   	beta.hat <- root.object$roots
+   		root.object <- do.call(rootFinder, all.args)
+   		beta.hat <- root.object$roots
         optim.object <- root.object$optim.object
 
         exp.beta.AX <- as.vector(exp( object$ax%*%beta.hat ) )
@@ -79,7 +79,7 @@ function(object, rootFinder=findRoots, ...){
         res.A.E.star <- as.vector(object$a-E.star)
         res.Y <- as.vector(object$y - 1 + 1/(1 + exp.beta.AX*exp.gamma.V))
 
-        d.res.A.E.star.gamma <- -object$v * exp.gamma.V * (exp.beta.X/q) * (exp.alpha.Z+E.star*(exp.alpha.Z-1))
+        d.res.A.E.star.gamma <- -object$v * exp.gamma.V * (exp.beta.X/q) * (exp.alpha.Z-E.star*(exp.alpha.Z+1))
         d.res.Y.gamma <- -object$v * exp.beta.AX * exp.gamma.V / (1 + exp.beta.AX*exp.gamma.V)^2
 
         d.res.A.E.star.alpha <- -object$z * E.star * (1-E.star)

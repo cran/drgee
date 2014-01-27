@@ -1,0 +1,11 @@
+Changes in version 1.0.1 (2014-01-27)
+
+o Fixed a bug in 'drFit'. The calculation of the
+  Jacobian was incorrect for doubly robust estimation
+  with outcome link logit, resulting in inconsistent
+  estimates of standard errors. This bug is now fixed.
+		
+
+Changes in Version 1.0 (2013-12-19)
+
+o First version released on CRAN
