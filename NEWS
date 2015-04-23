@@ -1,10 +1,35 @@
+Changes in version 1.1.1 (2015-04-20)
+
+o The arguments 'outcome', 'exposure' and 'clusterid'
+  can be supplied as vectors or as a string.
+
+o Changed the interface for the 'drgee' function.
+  Now the argument 'estimationMethod' has to be
+  "dr","o", or "e" corresponding to previous choices 
+  "dr", "obe" and "ebe".
+  When 'estimationMethod="o"', the user can supply an
+  argument 'exposure' instead of 'emodel'. Similarly,
+  when 'estimationMethod="e"', the user can supply an
+  argument 'outcome' instead of 'omodel'.
+
+o Changed the functions 'drgee' and 'gee' such
+  that they always return the variance as a matrix.
+
+Changes in version 1.1.0 (2015-02-09)
+
+o Added a function 'gee' which calculates all
+  coefficients in a regression.
+
+o Added an option 'cond' for 'drgee' and 'gee' for
+  models with cluster-specific intercepts.
+
 Changes in version 1.0.1 (2014-01-27)
 
 o Fixed a bug in 'drFit'. The calculation of the
   Jacobian was incorrect for doubly robust estimation
   with outcome link logit, resulting in inconsistent
   estimates of standard errors. This bug is now fixed.
-		
+
 
 Changes in Version 1.0 (2013-12-19)
 

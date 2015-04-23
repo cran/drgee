@@ -1,7 +1,7 @@
 \encoding{latin1}
 \name{findRoots}
 \alias{findRoots}
-%- Also NEED an '\alias' for EACH other topic documented here.
+
 \title{
 Non Linear Equation System Solving
 }
@@ -33,12 +33,11 @@ findRoots(beta.init, eq.func, d.eq.func = NULL, arg.list, ...)
 	}
 }
 \details{
-	\code{findRoots} calculates zeros fo the function \code{eq.func}
-	and is meant to be called from \code{ebeFit} and
-	\code{drFit}. It is the default equation solving function
-	in \code{drgee}. It is supplied as a separate function in order
-	to allow users to use other equation solvers by writing their
-	own wrapper with the same interface as \code{findRoots}.
+  \code{findRoots} calculates zeros fo the function \code{eq.func}
+  and is the default equation solving function in \code{drgee}.
+  It is supplied as a separate function in order to allow users
+  to use other equation solvers by writing their own wrapper
+  with the same interface as \code{findRoots}.
 }
 \value{
 	The value is a list containing the following arguments:
@@ -51,7 +50,6 @@ findRoots(beta.init, eq.func, d.eq.func = NULL, arg.list, ...)
 Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
 }
 \seealso{
-\code{\link{nleqslv}} in package \pkg{nleqslv}, \code{\link{ebeFit}}, \code{\link{drFit}}.
+\code{\link{nleqslv}} in package \pkg{nleqslv}.
 }
-\keyword{nonlinear}
 \keyword{optimize}

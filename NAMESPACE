@@ -1,9 +1,11 @@
 importFrom("stats", glm.fit, model.matrix, terms, printCoefmat)
 importFrom("nleqslv", nleqslv)
+import("survival")
 
 export(drgee, coef.drgee, vcov.drgee, print.drgee, summary.drgee,
-       print.summary.drgee, drgeeData, summary.drgeeData,
-       print.summary.drgeeData, obeFit, ebeFit, drFit, geeFit, findRoots, robVcov)
+       print.summary.drgee, gee, coef.gee, vcov.gee, print.gee, summary.gee,
+       print.summary.gee, findRoots, robVcov,
+       drgeeData, summary.drgeeData, print.summary.drgeeData)
 
 S3method(coef, drgee)
 S3method(vcov, drgee)
@@ -11,5 +13,11 @@ S3method(summary, drgee)
 S3method(print, drgee)
 S3method(summary, drgee)
 S3method(print, summary.drgee)
+S3method(coef, gee)
+S3method(vcov, gee)
+S3method(summary, gee)
+S3method(print, gee)
+S3method(summary, gee)
+S3method(print, summary.gee)
 S3method(summary, drgeeData)
 S3method(print, summary.drgeeData)

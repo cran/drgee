@@ -8,21 +8,21 @@ Robust Variance Calculation
 \code{robVcov} calculates the asymptotic variance for Z-estimators.
 }
 \usage{
-robVcov(U, d.U, id=NULL)
+robVcov(u, d.u, id=NULL)
 }
 
 \arguments{
-  \item{U }{
+  \item{u }{
   A n x q matrix of the estimating equations evaluated at the estimated
   model parameters,
   where n is the number of observations and q is the number of estimating equations.
   }
-  \item{d.U }{
-  The mean of the jacobian of \code{U} evaluated at the solution to the
+  \item{d.u }{
+  The mean of the jacobian of \code{u} evaluated at the solution to the
   estimating equations, with rows corresponding to the estimating
   equations and columns corresponding to the model parameters. The
   number of model parameters is assumed to equal the number of
-  estimating equations such that \code{d.U} is a q x q square matrix.
+  estimating equations such that \code{d.u} is a q x q square matrix.
   }
   \item{id }{
   A factor with levels corresponding the clusters in the data. Default
@@ -30,9 +30,9 @@ robVcov(U, d.U, id=NULL)
 }
 }
 \details{
- For robust variance estimation, see van der Vaart (1998).
+ For robust variance estimation, see van der Vaart (2000).
 
-  For clustered data, the rows in \code{U} are added clusterwise
+  For clustered data, the rows in \code{u} are added clusterwise
   resulting in a cluster robust estimate of the variance.
 }
 \value{
@@ -46,4 +46,4 @@ robVcov(U, d.U, id=NULL)
   Cambridge University Press, pp. 52--53.
 }
 \keyword{cluster}
-\keyword{robust}
+
