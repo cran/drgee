@@ -3,23 +3,20 @@ drgee <-
              exposure,
              oformula,
              eformula,
-             iaformula=formula(~1),
-             olink=c("identity","log","logit"),
-             elink=c("identity","log","logit"),
+             iaformula = formula(~1),
+             olink = c("identity", "log", "logit"),
+             elink = c("identity", "log", "logit"),
              data,
-             estimation.method=c("dr","o","e"),
-             cond=FALSE,
+             estimation.method = c("dr", "o", "e"),
+             cond = FALSE,
              clusterid,
-             rootFinder=findRoots,
+             rootFinder = findRoots,
              ...
              ) {
 
         call <- match.call()
-
         olink <- match.arg(olink)
-
         elink <- match.arg(elink)
-
         estimation.method <- match.arg(estimation.method)
 
         if (estimation.method != "o" & olink == "logit" & elink != "logit") {
@@ -45,6 +42,7 @@ drgee <-
                      "eformula", "elink", "exposure",
                      "cond",
                      "data",
+                     "estimation.method", 
                      "clusterid"),
                    names(call), 0L)
 

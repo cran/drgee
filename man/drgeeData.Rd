@@ -19,7 +19,8 @@ drgeeData(outcome, exposure,
           oformula, eformula, iaformula = formula(~1),
           olink = c("identity", "log", "logit"),
           elink = c("identity", "log", "logit"),
-          data, cond = FALSE, clusterid)
+          data, estimation.method = c("dr", "o", "e"),
+          cond = FALSE, clusterid)
 }
 
 \arguments{
@@ -68,17 +69,24 @@ drgeeData(outcome, exposure,
     \code{olink="logit"} this is replaced by \code{"logit"}.
   }
 
+  \item{data}{
+    A data frame or environment containing the variables in \code{iaformula},
+    \code{oformula} and \code{eformula}. If missing, variables are
+    expected to be found in the calling frame.
+  }
+
+  \item{estimation.method}{
+    A character string naming the desired estimation method. Choose
+    \code{"o"} for O-estimation,
+    \code{"e"} for E-estimation or
+    \code{"dr"} for DR-estimation. Default is \code{"dr"}.
+  }
+
   \item{cond }{
     A logical value indicating whether the nuisance models should have
     cluster-specific intercepts. If \code{cond=TRUE} the design matrices
     for the nuisance models do not have an intercept. Requires a
     \code{clusterid} argument.
-  }
-
-  \item{data}{
-    A data frame or environment containing the variables in \code{iaformula},
-    \code{oformula} and \code{eformula}. If missing, variables are
-    expected to be found in the calling frame.
   }
 
   \item{clusterid}{

@@ -1,11 +1,22 @@
-Changes in version 1.1.1 (2015-04-20)
+Changes in version 1.1.1 (2015-05-09)
+
+o Fixed a bug in 'drgeeData' that caused error when
+  no data argument is supplied.
+
+o There was an error in the previous version, when
+  the function 'drgeeData' removed outcome concordant
+  cluster for conditional methods. This is now corrected
+  such that this only happens for conditional logistic 
+  methods.
+
+Changes in version 1.1.0 (2015-04-20)
 
 o The arguments 'outcome', 'exposure' and 'clusterid'
   can be supplied as vectors or as a string.
 
 o Changed the interface for the 'drgee' function.
   Now the argument 'estimationMethod' has to be
-  "dr","o", or "e" corresponding to previous choices 
+  "dr","o", or "e" corresponding to previous choices
   "dr", "obe" and "ebe".
   When 'estimationMethod="o"', the user can supply an
   argument 'exposure' instead of 'emodel'. Similarly,
@@ -14,8 +25,6 @@ o Changed the interface for the 'drgee' function.
 
 o Changed the functions 'drgee' and 'gee' such
   that they always return the variance as a matrix.
-
-Changes in version 1.1.0 (2015-02-09)
 
 o Added a function 'gee' which calculates all
   coefficients in a regression.

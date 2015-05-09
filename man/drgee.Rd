@@ -64,6 +64,12 @@ drgee(outcome, exposure,
     \code{"logit"}. Default is \code{"identity"}.
   }
 
+  \item{data}{
+    A data frame or environment containing the variables used.
+    If missing, variables are expected to be found in the
+    calling environment of the calling environment.
+  }
+
   \item{estimation.method}{
     A character string naming the desired estimation method. Choose
     \code{"o"} for O-estimation,
@@ -74,12 +80,6 @@ drgee(outcome, exposure,
   \item{cond}{
     A logical value indicating whether the nuisance models should have
     cluster-specific intercepts. Requires a \code{clusterid} argument.
-  }
-
-  \item{data}{
-    A data frame or environment containing the variables used.
-    If missing, variables are expected to be found in the
-    calling environment of the calling environment.
   }
 
   \item{rootFinder}{

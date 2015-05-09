@@ -7,6 +7,7 @@ drgeeData <-
              olink = c("identity","log","logit"),
              elink = c("identity","log","logit"),
              data,
+             estimation.method = c("dr", "o", "e"),
              cond = FALSE,
              clusterid
              ) {
@@ -244,17 +245,31 @@ or a factor with two levels")
             obs.order <- 1:nobs
         }
 
-        ## For conditional methods, we exclude non-informative clusters
+        ## For conditional logistic methods, we exclude non-informative clusters
         if (cond) {
+            if (olink == "logit" & estimation.method =="o") {
 
-            id.tmp <- as.factor(id[obs.order])
-            y.tmp <- y[obs.order, 1]
-            ## For each cluster, identify the number of different values for the outcome
-            ni.vals <- ave(as.vector(y.tmp), id.tmp, FUN = function(y) {length(unique(y[which(!is.na(y)), ]))})
+                id.tmp <- as.factor(id[obs.order])
+                y.tmp <- y[obs.order, 1]
+                ## For each cluster, identify the number of different values for the outcome
+                ni.vals <- ave(as.vector(y.tmp), id.tmp, FUN = function(y) {length(unique(y[which(!is.na(y)), ]))})
 
-            ## Only use outcome-discordant clusters
-            compl.rows <- compl.rows & (ni.vals > 1)
+                ## Only use outcome-discordant clusters
+                compl.rows <- compl.rows & (ni.vals > 1)
+                
+            } else if (elink == "logit" & estimation.method =="e") {
+                
+                id.tmp <- as.factor(id[obs.order])
+                a.tmp <- a[obs.order, 1]
+                ## For each cluster, identify the number of different values for the outcome
+                ni.vals <- ave(as.vector(a.tmp), id.tmp, FUN = function(y) {length(unique(y[which(!is.na(y)), ]))})
+
+                ## Only use outcome-discordant clusters
+                compl.rows <- compl.rows & (ni.vals > 1)
+
+            }
         }
+        
 
         nobsnew <- sum(compl.rows)
 
