@@ -17,6 +17,7 @@ gee <-
         dD <- call[c(1L, m)]
         dD$oformula <- formula
         dD$olink <- link
+        dD$estimation.method <- "o"
 
         dD[[1L]] <- quote(drgeeData)
 

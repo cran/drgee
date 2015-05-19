@@ -16,6 +16,7 @@ drgeeData <-
 
         olink <- match.arg(olink)
         elink <- match.arg(elink)
+        estimation.method <- match.arg(estimation.method)
 
         if (missing(data)) {
             data <- parent.frame()
@@ -246,8 +247,8 @@ or a factor with two levels")
         }
 
         ## For conditional logistic methods, we exclude non-informative clusters
-        if (cond) {
-            if (olink == "logit" & estimation.method =="o") {
+        if (cond & olink == "logit") {
+            if (estimation.method == "o") {
 
                 id.tmp <- as.factor(id[obs.order])
                 y.tmp <- y[obs.order, 1]
@@ -256,9 +257,9 @@ or a factor with two levels")
 
                 ## Only use outcome-discordant clusters
                 compl.rows <- compl.rows & (ni.vals > 1)
-                
-            } else if (elink == "logit" & estimation.method =="e") {
-                
+
+            } else if (estimation.method == "e") {
+
                 id.tmp <- as.factor(id[obs.order])
                 a.tmp <- a[obs.order, 1]
                 ## For each cluster, identify the number of different values for the outcome
@@ -269,7 +270,7 @@ or a factor with two levels")
 
             }
         }
-        
+
 
         nobsnew <- sum(compl.rows)
 
@@ -329,8 +330,7 @@ or a factor with two levels")
             ax <- NULL
         }
 
-        ## Center variables
-        ## center around cluster mean for conditional methods
+        ## Do not use an intercept for conditional methods
         if (cond) {
 
             if (!is.null(oterms)) {

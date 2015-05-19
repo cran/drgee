@@ -1,3 +1,8 @@
+Changes in version 1.1.2 (2015-05-18)
+
+o Fixed a bug in 'drgeeData' for the 'estimation.method'
+  which happened when 'cond = TRUE' and 'olink = "logit"'.
+
 Changes in version 1.1.1 (2015-05-09)
 
 o Fixed a bug in 'drgeeData' that caused error when
@@ -6,7 +11,7 @@ o Fixed a bug in 'drgeeData' that caused error when
 o There was an error in the previous version, when
   the function 'drgeeData' removed outcome concordant
   cluster for conditional methods. This is now corrected
-  such that this only happens for conditional logistic 
+  such that this only happens for conditional logistic
   methods.
 
 Changes in version 1.1.0 (2015-04-20)
