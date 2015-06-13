@@ -1,8 +1,8 @@
 Package: drgee
 Type: Package
 Title: Doubly Robust Generalized Estimating Equations
-Version: 1.1.2
-Date: 2015-05-18
+Version: 1.1.3
+Date: 2015-06-12
 Author: Johan Zetterqvist <johan.zetterqvist@ki.se> , Arvid Sjölander <arvid.sjolander@ki.se> with contributions from Alexander Ploner.
 Maintainer: Johan Zetterqvist <johan.zetterqvist@ki.se>
 Description: Fit restricted mean models for the conditional association
@@ -18,6 +18,6 @@ Depends: stats, nleqslv, survival, R (>= 3.0.0)
 License: GPL-2 | GPL-3
 NeedsCompilation: no
 Encoding: UTF-8
-Packaged: 2015-05-18 15:14:19 UTC; johzet
+Packaged: 2015-06-12 15:28:18 UTC; johzet
 Repository: CRAN
-Date/Publication: 2015-05-19 13:03:14
+Date/Publication: 2015-06-13 00:53:37

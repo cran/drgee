@@ -2,17 +2,13 @@ eFit <-
     function(object, rootFinder = findRoots, ...){
 
 	if (class(object) != "drgeeData") {
-            stop("An object of class \"drgeeData\" is expected")
+            stop("An object of class \"drgeeData\" is expected\n\n")
 	}
 
         if (object$olink == "logit") {
 
             if (object$elink != "logit") {
                 warning("\nAssuming the logit link for the exposure nuisance model\n\n")
-            }
-
-            if (length(unique(object$a)) != 2) {
-    		stop("When elink is \"logit\" the exposure needs to be binary")
             }
 
             ## Let y and a switch place and replace v with z

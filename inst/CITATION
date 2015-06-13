@@ -1,0 +1,15 @@
+#citHeader("To cite package 'drgee' in publications use:")
+
+# Grab the version and date from the DESCRIPTION file
+if(!exists("meta") || is.null(meta)) meta <- packageDescription("drgee")
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date)
+vers <- paste("version", meta$Version)
+
+bibentry(bibtype="Manual",
+         title = "{drgee}: doubly robust generalized estimating equations",
+	 author = c( person("Johan", "Zetterqvist"),
+             person("Arvid", "Sj{\\\"o}lander")),
+	 year = year,
+	 note = vers,
+ 	 url="http://CRAN.R-project.org/package=drgee"
+	 )

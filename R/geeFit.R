@@ -10,7 +10,7 @@ geeFit <-
 	} else if (link == "log") {
             fit <- try( glm.fit(x = x, y = y, family = quasipoisson()) )
 	} else if(link == "logit") {
-            fit <- try( glm.fit(x = x, y = y, family = binomial()) )
+            fit <- try( glm.fit(x = x, y = y, family = quasibinomial()) )
 	}
 
 	if (class(fit) == 'try-error') {
