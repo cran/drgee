@@ -1,32 +1,31 @@
 dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
 
-    ## Center variables
-    ax.cent <- object$ax - apply(object$ax, 2, function(z) ave(z,object$id))
-    z.cent <- object$z - apply(object$z, 2, function(z) ave(z,object$id))
-
     ## Fit exposure nuisance model
     e.fit <- geeFitCond(object$a, object$z, object$elink, object$id, rootFinder,
                         ...)
     alpha.hat <- e.fit$coefficients
-    names(alpha.hat) <- colnames(object$z)
+    ## names(alpha.hat) <- colnames(object$z)
     x.res.e <- apply(object$x, 2, '*', e.fit$res)
 
     if (omodel) {
 
-        ## Center variables
-        v.cent <- object$v - apply(object$v,2,function(z) ave(z,object$id))
+        ## ## Center variables
+        ## v.cent <- object$v - apply(object$v,2,function(z) ave(z,object$id))
         ## Fit outcome nuisance model
         o.fit <- geeFitCond(object$y, cbind(object$ax,object$v), object$olink, object$id, rootFinder, ...)
         beta1.hat <- o.fit$coefficients[1:ncol(object$ax)]
-        names(beta1.hat) <- colnames(object$ax)
+        ## names(beta1.hat) <- colnames(object$ax)
         gamma.hat <- o.fit$coefficients[-(1:ncol(object$ax))]
-        names(gamma.hat) <- colnames(object$v)
+        ## names(gamma.hat) <- colnames(object$v)
     }
 
     if (object$olink == "identity") {
 
-        y.cent <- object$y - ave(object$y, object$id)
-
+        ## y.cent <- object$y - ave(object$y, object$id)
+        y.cent <- .Call("center", object$y, object$id, PACKAGE = "drgee")
+        ax.cent <- .Call("center", object$ax, object$id, PACKAGE = "drgee")
+        v.cent <- .Call("center", object$v, object$id, PACKAGE = "drgee")
+        
         if (omodel) {
             y.star.cent <- y.cent -  v.cent %*% gamma.hat
         } else {
@@ -71,7 +70,8 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
 
         u.func <- function(beta, arg.list) {
             s.o <- arg.list$y.star * exp(-arg.list$ax %*% beta)
-            s.o.cent <- s.o - ave(s.o, arg.list$id)
+            s.o.cent <- .Call("center", s.o, arg.list$id, PACKAGE = "drgee")
+            ## s.o.cent <- s.o - ave(s.o, arg.list$id)
             return( as.vector( crossprod( arg.list$x.res.e, s.o.cent) ) )
         }
 
@@ -91,13 +91,16 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
         ## The rows of d.u1 are the columns in u.dr
         ## and the columns are the partial derivatives
         s.o <- as.vector( y.star * exp(- object$ax %*% beta.hat) )
-        s.o.cent <- s.o - ave(s.o, object$id)
+        s.o.cent <- .Call("center", s.o, object$id, PACKAGE = "drgee")
+        ## s.o.cent <- s.o - ave(s.o, object$id)
         x.s.o.cent <- apply(object$x, 2, '*', s.o.cent)
 
         u1 <- apply(x.res.e, 2, '*', s.o.cent)
 
         d.s.o.beta <- apply(-object$ax, 2, '*', s.o)
-        d.s.o.beta.cent <- d.s.o.beta - apply(d.s.o.beta, 2, function(z) ave(z, object$id))
+        ## d.s.o.beta.cent <- d.s.o.beta - apply(d.s.o.beta, 2, function(z) ave(z,
+        ## object$id))
+        d.s.o.beta.cent <- .Call("center", d.s.o.beta, object$id, PACKAGE = "drgee")
         d.u1.beta <- crossprod( x.res.e, d.s.o.beta.cent  )
 
         d.u1.alpha <- crossprod(x.s.o.cent, e.fit$d.res)
@@ -108,7 +111,9 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
             d.u1.beta1 <- matrix( rep(0, ncol(object$ax)^2), ncol = ncol(object$ax))
 
             d.s.o.gamma <- apply(-object$v, 2, '*', s.o)
-            d.s.o.gamma.cent <- d.s.o.gamma - apply(d.s.o.gamma, 2, function(z) ave(z,object$id))
+            ## d.s.o.gamma.cent <- d.s.o.gamma - apply(d.s.o.gamma, 2, function(z)
+            ## ave(z,object$id))
+            d.s.o.gamma.cent <- .Call("center", d.s.o.gamma, object$id, PACKAGE = "drgee")
             d.u1.gamma <- crossprod( x.res.e, d.s.o.gamma.cent  )
         }
 
@@ -119,6 +124,7 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
     ## The rows are the columns in u
     ## and the columns are the partial derivatives
 
+    z.cent <- .Call("center", object$z, object$id, PACKAGE = "drgee")
     ## Exposure nuisance model estimating equations
     u2 <- apply(z.cent, 2, '*', e.fit$res)
 
@@ -149,7 +155,8 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
                      cbind(d.u3.beta.alpha, d.u3.beta1.gamma) ) / nrow(u)
 
         coefficients <- c(beta.hat, alpha.hat, beta1.hat, gamma.hat)
-
+        coef.names <- c(object$ax.names, object$z.names, object$ax.names, object$v.names)
+        
     } else {
 
         u <- cbind(u1, u2)
@@ -158,13 +165,16 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
                      cbind(d.u2.beta, d.u2.alpha)) / nrow(u)
 
         coefficients <- c(beta.hat, alpha.hat)
+        coef.names <- c(object$ax.names, object$z.names)
     }
 
+    names(coefficients) <- coef.names
+    
     ## Calculate variance of all estimates
 
     vcov <- robVcov(u, d.u, object$id)
 
-    dimnames(vcov) <- list(names(coefficients), names(coefficients))
+    dimnames(vcov) <- list(coef.names, coef.names)
 
     result <- list(coefficients = coefficients, vcov = vcov,
                    optim.object = optim.object)

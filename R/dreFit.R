@@ -7,15 +7,10 @@ dreFit <-
 
             e.fit <- geeFit(object$a, cbind(object$yx, object$z), "logit")
 
-            beta1.hat <- o.fit$coefficients[colnames(object$ax)]
-            gamma.hat <- o.fit$coefficients[colnames(object$v)]
-            beta2.hat <- e.fit$coefficients[colnames(object$yx)]
-            alpha.hat <- e.fit$coefficients[colnames(object$z)]
-
-            names(beta1.hat) <- colnames(object$ax)
-            names(gamma.hat) <- colnames(object$v)
-            names(beta2.hat) <- colnames(object$yx)
-            names(alpha.hat) <- colnames(object$z)
+            beta1.hat <- o.fit$coefficients[object$ax.names]
+            gamma.hat <- o.fit$coefficients[object$v.names]
+            beta2.hat <- e.fit$coefficients[object$yx.names]
+            alpha.hat <- e.fit$coefficients[object$z.names]
 
             exp.gamma.v <- as.vector(exp( object$v %*% gamma.hat ))
             exp.alpha.z <- as.vector(exp( object$z %*% alpha.hat ))
@@ -66,7 +61,6 @@ dreFit <-
             ## Call equation solver with beta.init as initial guess and eq.func as estimation function
             root.object <- do.call(rootFinder, all.args)
             beta.hat <- root.object$roots
-            names(beta.hat) <- colnames(object$ax)
             optim.object <- root.object$optim.object
 
             exp.beta.ax <- as.vector(exp( object$ax %*% beta.hat ) )
@@ -127,24 +121,26 @@ dreFit <-
                          ) / nrow(U)
 
             coefficients <- c(beta.hat, beta2.hat, alpha.hat, beta1.hat, gamma.hat)
+            coef.names <- c(object$ax.names, object$ax.names, object$z.names, object$ax.names, object$v.names)
 
             ## If outcome link is identity or log
-        }else{
+        } else {
 
             if(omodel){
+                
                 o.fit <- geeFit(object$y, cbind(object$ax, object$v), object$olink)
                 beta1.hat <- o.fit$coefficients[colnames(object$ax)]
-                names(beta1.hat) <- colnames(object$ax)
                 gamma.hat <- o.fit$coefficients[colnames(object$v)]
-                names(gamma.hat) <- colnames(object$v)
                 v.gamma.hat <- object$v %*%o.fit$coefficients[colnames(object$v)]
+
             }else{
+                
                 v.gamma.hat <- rep(0, nrow(object$y))
             }
+            
 
             e.fit <- geeFit(object$a, object$z, object$elink)
             alpha.hat <- e.fit$coefficients
-            names(alpha.hat) <- colnames(object$z)
 
             if(object$olink=="identity"){
 
@@ -152,7 +148,7 @@ dreFit <-
 
                 beta.hat <- as.vector(solve(w %*% object$ax) %*% w %*%
                                       (object$y - v.gamma.hat))
-                names(beta.hat) <- colnames(object$ax)
+                
                 res.y <- as.vector(object$y - object$ax %*% beta.hat - v.gamma.hat)
 
                 optim.object <- NULL
@@ -196,7 +192,6 @@ dreFit <-
                 ## call equation solver with beta.init as initial guess and eq.func as estimation function
                 root.object <- do.call(rootFinder, all.args)
                 beta.hat <- root.object$roots
-                names(beta.hat) <- colnames(object$ax)
                 optim.object <- root.object$optim.object
                 res.y <- as.vector(object$y * exp(-object$ax %*% beta.hat) - exp.v.gamma)
                 d.res.y.beta <- -object$ax * as.vector((object$y) * exp(-object$ax %*% beta.hat))
@@ -238,6 +233,7 @@ dreFit <-
                              cbind(d.U3.beta.alpha, d.U3.beta1.gamma)) / nrow(U)
 
                 coefficients <- c(beta.hat, alpha.hat, beta1.hat, gamma.hat)
+                coef.names <- c(object$ax.names, object$z.names, object$ax.names, object$v.names)
 
             } else {
                 U <- cbind(U1, U2)
@@ -246,14 +242,19 @@ dreFit <-
                              cbind(d.U2.beta, d.U2.alpha) ) / nrow(U)
 
                 coefficients <- c(beta.hat, alpha.hat)
+                coef.names <- c(object$ax.names, object$z.names)
 
             }
 
         }
 
+        names(coefficients) <- coef.names
+        
+        ## Calculate variance of all estimates
+        
         vcov <- robVcov(U, d.U, object$id)
 
-        dimnames(vcov) <- list(names(coefficients), names(coefficients))
+        dimnames(vcov) <- list(coef.names, coef.names)
 
         result <- list(coefficients = coefficients, vcov = vcov,
                        optim.object = optim.object,

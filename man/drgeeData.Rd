@@ -115,9 +115,7 @@ drgeeData(outcome, exposure,
   \code{drgee.data } returns an object of class \code{drgeeData}
   containing
   \item{y }{The outcome matrix.}
-  \item{outname }{A string for the name of the outcome.}
   \item{a }{The exposure matrix.}
-  \item{expname }{A string for the name of the exposure.}
   \item{x }{The matrix of of interactions defined in \code{iaformula}.
   	   This matrix will always contain a column with 1's.}
   \item{ax }{The matrix of elementwise product(s) of \code{a} and
@@ -129,6 +127,13 @@ drgeeData(outcome, exposure,
   \item{id }{A factor defining clusters. For independent observations,
     the number of levels equals the number of complete observations.}
   \item{clustname }{A string for the name of the cluster defining variable.}
+  \item{y.names }{A string for the name of the outcome.}
+  \item{a.names }{A string for the name of the exposure.}
+  \item{x.names }{A string vector for the variable names in \code{x}.}
+  \item{ax.names }{A string vector for the variable names in \code{ax}.}
+  \item{v.names }{A string vector for the variable names in \code{v}.}
+  \item{z.names }{A string vector for the variable names in \code{z}.}
+  \item{yx.names }{A string vector for the variable names in \code{yx}.}
   \item{olink }{A character string naming the link function in the outcome nuisance
   model.}
   \item{elink }{A character string naming the link function in the outcome nuisance
@@ -141,8 +146,6 @@ drgeeData(outcome, exposure,
   \item{eterms }{The \code{terms} object corresponding to the exposure
   nuisance model.}
 
-  All matrix elements have rows corresponding to the complete observations
-  in the original data.
 }
 \author{
   Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}

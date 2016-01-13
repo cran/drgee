@@ -76,10 +76,14 @@ clusterid, rootFinder = findRoots, ...)
   \item{coefficients }{Estimates of the parameters.}
   \item{vcov }{Robust variance of the estimates.}
   \item{call }{The matched call.}
-  \item{geeData }{The \code{geeData} object used in the calculations.}
+  \item{gee.data }{The \code{drgee.data} object used in the calculations.}
   \item{optim.object }{An estimation object returned from the function specified
     in the \code{rootFinder}, if this function is called.}
-
+  \item{res }{The residuals from the estimating equations.}
+  \item{d.res }{The derivative of the residuals from the estimating equations.}
+  \item{naive.var }{The non-robust estimate of covariance of the
+    estimates, if available. }
+  
   The class methods \code{coef} and \code{vcov} can be used to extract
   the estimated parameters and their covariance matrix from a
   \code{gee} object. \code{summary.drgee} produces a summary of the

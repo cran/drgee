@@ -16,7 +16,6 @@ geeFit <-
 	if (class(fit) == 'try-error') {
 
             d.res = matrix(rep(NA,nrow(x) * ncol(x)), nrow = nrow(x))
-            colnames(d.res) <- colnames(x)
 
             return( list(coefficents = rep(NA, ncol(x)),
                          res = rep(NA,nrow(y)),

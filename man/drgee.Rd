@@ -257,7 +257,7 @@ y<-rnorm(n,
 mean = beta0 * a + beta1 * a * l1 + gamma0 + gamma1 * l1 + gamma2 * l2,
 sd = 1)
 
-data<-data.frame(y,a,l1,l2)
+simdata<-data.frame(y,a,l1,l2)
 
 ## outcome nuisance model misspecified and
 ## exposure nuisance model correctly specified
@@ -267,19 +267,19 @@ dr.est <- drgee(oformula = formula(y~l1),
 eformula = formula(a~l1+l2),
 iaformula = formula(~l1),
 olink = "identity", elink = "logit",
-data = data, estimation.method = "dr")
+data = simdata, estimation.method = "dr")
 summary(dr.est)
 
 ## O-estimation
 o.est <- drgee(exposure = "a", oformula = formula(y~l1),
-iaformula = formula(~l1), olink = "identity", data = data,
-estimation.method = "o")
+iaformula = formula(~l1), olink = "identity",
+data = simdata, estimation.method = "o")
 summary(o.est)
 
 ## E-estimation
 e.est <- drgee(outcome = "y", eformula = formula(a~l1+l2),
-iaformula = formula(~l1), elink="logit", data = data,
-estimation.method = "e")
+iaformula = formula(~l1), elink="logit",
+data = simdata, estimation.method = "e")
 summary(e.est)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
@@ -299,10 +299,11 @@ summary(e.est)
 
   Robins JM (1999), Robust Estimation in Sequentially Ignorable
   Missing Data and Causal Inference Models, \emph{Proceedings of the
-  American Statistical Association Section on Bayesian Statistical
-  Science}, pp. 6--10
+    American Statistical Association Section on Bayesian Statistical
+    Science}, pp. 6--10
 
   Tchetgen E.J.T., Robins J.M., Rotnitzky A. (2010), On Doubly Robust
-  Estimation in a Semiparametric Odds Ratio Model, \emph{Biometrika}, \bold{97},
+  Estimation in a Semiparametric Odds Ratio Model, \emph{Biometrika},
+  \bold{97},
   1, 171--180
- }
+}

@@ -41,7 +41,7 @@ findRoots(beta.init, eq.func, d.eq.func = NULL, arg.list, ...)
 }
 \value{
 	The value is a list containing the following arguments:
-	\item{root }{The zero(s) of the function \code{eq.func}.
+	\item{roots }{The zero(s) of the function \code{eq.func}.
 	}
 	\item{optim.object }{The optimization object returned from \code{nleqslv}.
 	}

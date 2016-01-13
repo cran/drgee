@@ -1,6 +1,8 @@
-importFrom("stats", glm.fit, model.matrix, terms, printCoefmat)
-importFrom("nleqslv", nleqslv)
 import("survival")
+import("data.table")
+importFrom("stats", "coef", "cov", "vcov", "formula", "gaussian", "model.frame", "na.pass", "pnorm", "quasibinomial", "quasipoisson", "glm.fit", "model.matrix", "terms", "printCoefmat")
+importFrom("nleqslv", "nleqslv")
+importFrom("Rcpp", "sourceCpp")
 
 export(drgee, coef.drgee, vcov.drgee, print.drgee, summary.drgee,
        print.summary.drgee, gee, coef.gee, vcov.gee, print.gee, summary.gee,
@@ -21,3 +23,6 @@ S3method(summary, gee)
 S3method(print, summary.gee)
 S3method(summary, drgeeData)
 S3method(print, summary.drgeeData)
+
+useDynLib(drgee)
+

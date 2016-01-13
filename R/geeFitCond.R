@@ -4,11 +4,10 @@ geeFitCond <-
 
         link <- match.arg(link)
 
-        x.cent <- x - apply(x, 2, function(z) ave(z,id))
-
         if (link == "identity") {
 
-            y.cent <- y - ave(y,id)
+            y.cent <- .Call("center", y, id, PACKAGE = "drgee")
+            x.cent <- .Call("center", x, id, PACKAGE = "drgee")
 
             ## Solve the equation     t(instr) %*% (  y.cent - x.cent %*% beta ) = 0
             ## t(instr) %*% y.cent = t(instr) %*% x.cent %*% beta
@@ -32,7 +31,8 @@ geeFitCond <-
 
             u.func <- function(beta, arg.list) {
                 y.star <- arg.list$y * exp(-arg.list$x %*% beta)
-                y.star.cent <- y.star - ave(y.star, arg.list$id)
+                ## y.star.cent <- y.star - ave(y.star, arg.list$id)
+                y.star.cent <- .Call("center", y.star, arg.list$id, PACKAGE = "drgee")
                 as.vector( crossprod( arg.list$x.cent , y.star.cent))
             }
 
@@ -45,15 +45,11 @@ geeFitCond <-
             beta.hat <- root.object$roots
 
             y.star.hat <- as.vector(y * exp(-x %*% beta.hat))
-            y.star.hat.cmean <- ave(y.star.hat, id)
-
+            
             d.y.star.hat.beta <- y.star.hat * -x
-            d.y.star.hat.beta.cmean <- apply(d.y.star.hat.beta, 2, function(z) ave(z,id))
-
-            res = y.star.hat - y.star.hat.cmean
-            d.res = d.y.star.hat.beta -  d.y.star.hat.beta.cmean
-
-            names(beta.hat) <- colnames(x)
+            
+            res  <- .Call("center", y.star.hat, id, PACKAGE = "drgee")
+            d.res <- .Call("center", d.y.star.hat.beta, id, PACKAGE = "drgee")
 
             return( list(coefficients = beta.hat,
                          res = res,
@@ -64,39 +60,8 @@ geeFitCond <-
 
         } else if (link == "logit") {
 
-            fit <- try(survival::clogit(y~x.cent + strata(id), method = "exact") )
-            root.object <- list()
-            root.object$optim.object <- NULL
-
-            if (class(fit)[1] == "try-error") {
-
-                beta.hat <- rep(NA, ncol(x))
-                names(beta.hat) <- colnames(x)
-
-                eq.res <- rep(NA, nrow(x))
-
-                d.eq.res <- matrix( rep(NA, length(x)), nrow = nrow(x) )
-                colnames(d.eq.res) <- colnames(x)
-
-                res.list <- list(eq.res = eq.res, d.eq.res = d.eq.res)
-
-                naive.var = NULL
-            } else {
-                beta.hat <- coef(fit)
-
-                names(beta.hat) <- colnames(x)
-
-                res.list <- clogitRes(beta.hat, y, x.cent, id )
-
-            }
-
-            return( list(coefficients = beta.hat,
-                         res = res.list$eq.res,
-                         d.res = res.list$d.eq.res,
-                         eq.x = x.cent,
-                         optim.object = root.object$optim.object,
-                         naive.var = fit$var) )
-
+            x.cent <- .Call("center", x, id, PACKAGE = "drgee")
+            return( condit(y, x.cent, id) )
 
         }
 

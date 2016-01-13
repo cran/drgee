@@ -13,21 +13,8 @@ eFit <-
 
             ## Let y and a switch place and replace v with z
             ## and run retrospective logistic regression
-            outcome <- object$outname
-            object$outname <- object$expname
-            object$expname <- outcome
-            object$y <- object$a
-            colnames(object$y) <- colnames(object$a)
 
-            exposures.all <- colnames(object$ax)
-            object$ax <- object$yx
-            colnames(object$ax) <- exposures.all
-
-            object$v <- object$z
-            colnames(object$v) <- colnames(object$z)
-            object$oterms <- object$eterms
-
-            return(oFit(object))
+            return(oFit(object, inv = TRUE))
 
             ## If the outcome link is identity or log
         } else {

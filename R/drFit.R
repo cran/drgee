@@ -10,8 +10,8 @@ drFit <-
         }
 
         if (object$cond) {
-            return(dreFitCond(object, omodel = TRUE, rootFinder, ...))
+            return( dreFitCond(object, omodel = TRUE, rootFinder, ...) )
         } else {
-            return(dreFit(object, omodel = TRUE, rootFinder, ...))
+            return( dreFit(object, omodel = TRUE, rootFinder, ...) )
         }
     }
