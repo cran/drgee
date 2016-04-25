@@ -19,9 +19,9 @@ eFit <-
             ## If the outcome link is identity or log
         } else {
             if (object$cond) {
-                return(dreFitCond(object, omodel = FALSE, rootFinder = findRoots, ...))
+                return(dreFitCond(object, omodel = FALSE, rootFinder = rootFinder, ...))
             } else {
-                return(dreFit(object, omodel = FALSE, rootFinder = findRoots, ...))
+                return(dreFit(object, omodel = FALSE, rootFinder = rootFinder, ...))
             }
         }
     }

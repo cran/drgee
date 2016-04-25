@@ -52,11 +52,11 @@ drgee <-
 
         drgee.data <- eval(dD, parent.frame())
 
-        if (estimation.method=="o") {
+        if (estimation.method == "o") {
             fit <- oFit(drgee.data)
-        } else if (estimation.method=="e") {
+        } else if (estimation.method == "e") {
             fit <- eFit(drgee.data, rootFinder, ...)
-        } else if (estimation.method=="dr") {
+        } else if (estimation.method == "dr") {
             fit <- drFit(drgee.data, rootFinder, ...)
         }
 
@@ -68,7 +68,7 @@ drgee <-
         fit$vcov.all <- fit$vcov
         fit$vcov <- fit$vcov[1:ncol(drgee.data$ax), 1:ncol(drgee.data$ax), drop = F]
 
-        fit$drgee.data<- drgee.data
+        fit$drgee.data <- drgee.data
 
         fit$estimation.method <- estimation.method
 
@@ -84,8 +84,9 @@ print.drgee <-
             print.default(format(coef(x), digits = digits),
                           print.gap = 2, quote = FALSE)
             cat("\n")
-        } else cat("No coefficients\n\n")
-
+        } else {
+            cat("No coefficients\n\n")
+        }
     }
 
 summary.drgee <-

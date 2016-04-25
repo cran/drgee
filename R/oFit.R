@@ -15,7 +15,8 @@ oFit <-
                 stop("\nReverse regression only possible in the logit-logit case\n")
             
             if (object$cond) {
-                fit <- geeFitCond(y = object$a, x = cbind(object$yx, object$z), link = object$olink, object$id, ...)
+                fit <- geeFitCond(y = object$a, x = cbind(object$yx, object$z),
+                link = object$olink, id = object$id, ...)
             } else {
                 fit <- geeFit(y = object$a, x = cbind(object$yx, object$z), link = object$olink)
             }
@@ -25,7 +26,8 @@ oFit <-
         } else {
             
             if (object$cond) {
-                fit <- geeFitCond(y = object$y, x = cbind(object$ax, object$v), link = object$olink, object$id, ...)
+                fit <- geeFitCond(y = object$y, x = cbind(object$ax, object$v),
+                link = object$olink, id = object$id, ...)
             } else {
                 fit <- geeFit(y = object$y, x = cbind(object$ax, object$v), link = object$olink)
             }

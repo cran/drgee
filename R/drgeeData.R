@@ -13,7 +13,6 @@ drgeeData <-
              ) {
 
         call <- match.call()
-
         olink <- match.arg(olink)
         elink <- match.arg(elink)
         estimation.method <- match.arg(estimation.method)
@@ -70,34 +69,40 @@ drgeeData <-
 
         }
 
-
         if (missing(data)) {
+            
             data <- parent.frame()
+
         }
 
         if (!missing(oformula)) {
+            
             oterms <- terms(oformula)
-            omf <- model.frame(formula = oformula, data = data, na.action = na.pass, drop.unused.levels = TRUE)
-
+            omf <- model.frame(formula = oformula, data = data, na.action =
+            na.pass, drop.unused.levels = TRUE)
             ## we define the outcome as the response in the oformula
             if (attr(oterms,"response")) {
+            ## we define the outcome as the response in the oformula
                 outname <- all.vars(oformula)[1]
+            ## we define the outcome as the response in the oformula
             } else {
                 outname <- NULL
             }
+            
         } else {
 
+            ## stop("\nstopped here since no oformula...\n\n")
             if(estimation.method %in% c("dr", "o")) {
                 stop("\nAn outcome nuisance model is needed\n\n");
             } else {
                 oterms <- NULL;
                 outname <- NULL;
             }
+            
         }
 
         ## Extract the outcome if it is given
         if (!missing(outcome)) {
-
             ## If the outcome is not given as a string
             ## get the name of the object that was given
             ## as input
@@ -114,18 +119,22 @@ drgeeData <-
 
         }
 
-
+        if(missing(outcome) & missing(oformula)) {
+            stop("\nAn outcome is needed\n\n")
+        }
 
         if (is.null(outname)) {
             stop("An outcome needs to be specified\n\n")
         } else {
-            tempof <- formula(paste("~", outname))
 
+            tempof <- formula(paste("~", outname))
+            
             if (is.environment(data)) {
                 environment(tempof) <- data
             }
 
-            yf <- model.frame(tempof, data = data, na.action = na.pass, drop.unused.levels = TRUE)
+            yf <- model.frame(tempof, data = data, na.action = na.pass,
+                              drop.unused.levels = TRUE)
             y.all <- model.matrix(tempof, yf)
 
             if (dim(y.all)[2] != 2) {
@@ -147,6 +156,7 @@ or a factor with two levels\n\n")
             ## Identify complete observations
             compl.rows <- !is.na(y[, 1])
 
+            
         }
 
         ## Check that we have the same number of observations for all given
@@ -283,7 +293,14 @@ or a factor with two levels\n\n")
                 }
 
             } else {
-                clustname <- call[["clusterid"]]
+                clustarg <- call[["clusterid"]]
+                if( is.character(clustarg) ) {
+                    clustname <- clustarg
+                } else {
+                    clustname.tmp <- as.character(clustarg)
+                    clustname <- clustname.tmp[length(clustname.tmp)]
+                }
+                
                 id <- as.vector(clusterid)
             }
 
@@ -348,16 +365,23 @@ or a factor with two levels\n\n")
             z.names <- NULL
         }
 
-        x <- matrix( rep(1, nobsnew), ncol = 1)
 
-        if (!is.null(iaterms)) {
-            if (!length(attr(iaterms, "term.labels")) == 0) {
+        if ( !is.null(iaterms) ) {
+
+            if ( length(attr(iaterms, "term.labels")) == 0 ) {
+                x <- matrix( rep(1, nobsnew), ncol = 1)
+                x.names <- "(Intercept)"
+                colnames(x) <- x.names
+            } else {
                 x <- model.matrix(iaterms, iamf)[rows.to.use,, drop = F]
+                x.names <- colnames(x)
             }
+        } else {
+            x <- matrix( rep(1, nobsnew), ncol = 1)
+            x.names <- "(Intercept)"
+            colnames(x) <- x.names
         }
 
-        x.names <- colnames(x)
-        
         if (olink == "logit") {
             yx.names <- rep("", ncol(x))
             yx.names[1] <- y.names
@@ -407,7 +431,8 @@ or a factor with two levels\n\n")
 
         }
 
-        drgee.data <- list(y = y,
+        drgee.data <- list(orig.order = order(rows.to.use),
+                           y = y,
                            a = a,
                            x = x,
                            ax = ax,
@@ -452,22 +477,15 @@ summary.drgeeData <-
             outcome.nuisance.model <- paste(object$y.names,"~",
                                             paste(c(object$v.names),
                                                   collapse = " + "), sep = " ")
-            outcome.model <- paste(object$y.names,"~",
-                                   paste(c(object$ax.names, object$v.names),
-                                         collapse = " + "), sep = " ")
 
         } else {
-            if (!is.null(object$v)) {
+            if (!is.null(object$v) & length(object$v.names) > 1) {
                 outcome.nuisance.model <- paste(object$y.names,"~",
                                                 paste(c(object$v.names[-1]),
                                                       collapse = " + "), sep = " ")
             } else {
                 outcome.nuisance.model <- paste(object$y.names,"~ 1")
             }
-
-            outcome.model <- paste(object$ynames,"~",
-                                   paste(c(object$ax.names, object$v.names[-1]),
-                                         collapse = " + "), sep = " ")
 
         }
 
@@ -476,23 +494,15 @@ summary.drgeeData <-
                                              paste(object$z.names,
                                                    collapse = " + "), sep = " ")
 
-            exposure.model <- paste(object$a.names,"~",
-                                    paste(c(object$yx.names, object$z.names),
-                                          collapse = " + "), sep = " ")
-
         } else {
 
-            if(!is.null(object$z)){
-                exposure.nuisance.model <- paste(object$a.anmes,"~",
+            if(!is.null(object$z) & length(object$z.names) > 1){
+                exposure.nuisance.model <- paste(object$a.names,"~",
                                                  paste(object$z.names[-1],
                                                        collapse = " + "), sep = " ")
             } else {
                 exposure.nuisance.model <- paste(object$a.names,"~ 1")
             }
-
-            exposure.model <- paste(object$a.names,"~",
-                                    paste(c(object$yx.names, object$z.names[-1]),
-                                          collapse = " + "), sep = " ")
 
         }
 
@@ -502,9 +512,7 @@ summary.drgeeData <-
                     interactions = object$x.names,
                     main.model = main.model,
                     outcome.nuisance.model = outcome.nuisance.model,
-                    outcome.model = outcome.model,
                     exposure.nuisance.model = exposure.nuisance.model,
-                    exposure.model = exposure.model,
                     n.obs = length(object$id),
                     n.clust = nlevels(object$id),
                     clustname = object$clustname,

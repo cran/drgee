@@ -21,7 +21,8 @@ geeFit <-
                          res = rep(NA,nrow(y)),
                          d.res = d.res,
                          eq.x = eq.x,
-                         optim.object = NULL) )
+                         optim.object = NULL,
+                         naive.var = NULL) )
 
         } else {
 

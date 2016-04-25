@@ -191,7 +191,7 @@ drgee(outcome, exposure,
   \code{drgee} returns an object of class \code{drgee} containing:
 
   \item{coefficients }{Estimates of the parameters in the main model.}
-  \item{vcov }{Robust variance of the estimates of main model parameters.}
+  \item{vcov }{Robust variance for all main model parameters.}
   \item{coefficients.all }{Estimates of all estimated parameters.}
   \item{vcov.all }{Robust variance of the all parameter estimates.}
   \item{optim.object }{An estimation object returned from the function specified

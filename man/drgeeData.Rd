@@ -114,6 +114,7 @@ drgeeData(outcome, exposure,
 \value{
   \code{drgee.data } returns an object of class \code{drgeeData}
   containing
+  \item{orig.order }{The original order of the observations. }
   \item{y }{The outcome matrix.}
   \item{a }{The exposure matrix.}
   \item{x }{The matrix of of interactions defined in \code{iaformula}.

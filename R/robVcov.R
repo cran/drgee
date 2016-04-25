@@ -18,10 +18,13 @@ robVcov <-
             vcov <- matrix(rep( NA, n.par^2 ), ncol = n.par )
 
         } else {
+            
             ## If data is not clustered we divide by
             ## the number of observations
             if (is.null(id) | n.clust == n.obs) {
+                
                 correction.term <- 1 / n.obs
+                
             } else {
                 
                 ## If data is clustered we use the clustersums of u
@@ -33,7 +36,8 @@ robVcov <-
                 correction.term <- n.clust / n.obs^2
             }
 
-            vcov <- inv.d.u %*% cov(u) %*% t(inv.d.u) * correction.term
+            vcov <- inv.d.u %*% cov(u, u) %*% t(inv.d.u) * correction.term
+            
         }
 
         return( vcov )

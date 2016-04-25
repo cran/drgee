@@ -6,12 +6,13 @@ drFit <-
 	}
 
         if (object$cond & object$olink=="logit") {
-            stop("Doubly robust conditional estimation with outcome link logit is not possible.")
-        }
-
-        if (object$cond) {
-            return( dreFitCond(object, omodel = TRUE, rootFinder, ...) )
+            stop("Doubly robust conditional estimation with outcome link
+            logit is not possible (yet...).")
+        } else if (object$cond) {
+            return( dreFitCond(object, omodel = TRUE,
+                               rootFinder = rootFinder, ...) )
         } else {
-            return( dreFit(object, omodel = TRUE, rootFinder, ...) )
+            return( dreFit(object, omodel = TRUE,
+                           rootFinder = rootFinder, ...) )
         }
     }

@@ -6,7 +6,7 @@ gee <-
               clusterid,
               rootFinder = findRoots,
               ...
-              ){
+              ) {
 
         call <- match.call()
 
@@ -23,18 +23,30 @@ gee <-
 
         gee.data <- eval(dD, parent.frame())
 
+        naive.var <- NULL
+        
         if (cond) {
+            
             if (is.null(gee.data$v)) {
+                
                 stop("No parameters to estimate\n\n")
+                
             } else {
-                fit <- geeFitCond(gee.data$y, gee.data$v, link = link, gee.data$id,
+                
+                fit <- geeFitCond(gee.data$y,
+                                  gee.data$v,
+                                  gee.data$y.names,
+                                  gee.data$v.names, 
+                                  link = link,
+                                  gee.data$id,
                                   rootFinder, ...)
-                naive.var <- fit$naive.var
-            }
-
+                    
+                }
+            
         } else {
+        
             fit <- geeFit(gee.data$y, gee.data$v, link = link)
-            naive.var <- NULL
+
         }
 
         coefficients = fit$coefficients
@@ -48,14 +60,22 @@ gee <-
 
         dimnames(vcov) <- list(gee.data$v.names, gee.data$v.names)
 
+        y <- as.vector(gee.data$y)[gee.data$orig.order]
+        
+        x <- gee.data$v[gee.data$orig.order,, drop = FALSE]
+        
+        colnames(x) <- gee.data$v.names
+        
         result <- list(coefficients = coefficients,
                        vcov = vcov,
                        call = call,
                        cond = cond,
-                       gee.data = gee.data,
+                       y = y,
+                       x = x,
+                       gee.data = gee.data, 
                        optim.object = fit$optim.object,
-                       res = fit$res,
-                       d.res = fit$d.res,
+                       res = fit$res[gee.data$orig.order],
+                       d.res = fit$d.res[gee.data$orig.order,, drop = FALSE],
                        naive.var = naive.var)
 
         class(result) <- "gee"
@@ -89,10 +109,16 @@ summary.gee <-
 
         summ <- summary(object$gee.data)
 
+        if ( ( object$gee.data$cond & ncol(object$gee.data$v) == 0 ) | ( !object$gee.data$cond & ncol(object$gee.data$v) ) ) {
+            model.formula <- paste( object$gee.data$y.names, " ~ 1", sep = "")
+        } else {
+            model.formula = summ$outcome.nuisance.model
+        }
+        
 	ans <- list(call = object$call,
                     coefficients = coef.table,
                     vcov = vcov(object),
-                    model.formula = summ$outcome.nuisance.model,
+                    model.formula = model.formula,
                     link = summ$olink,
                     n.obs = summ$n.obs,
                     n.clust = summ$n.clust)
@@ -106,6 +132,8 @@ print.summary.gee <-
              signif.stars = getOption("show.signif.stars"), ...){
         cat("\nCall:  ",
             paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n", sep = "")
+
+        
 
         cat("\nModel: ",x$model.formula,"\n")
 

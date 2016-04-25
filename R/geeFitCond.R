@@ -1,10 +1,25 @@
 geeFitCond <-
-    function(y, x, link = c("identity","log","logit"), id, rootFinder =
-             findRoots, ...) {
-
+    function(y,
+             x,
+             y.names = colnames(y),
+             x.names = colnames(x), 
+             link = c("identity", "log", "logit"),
+             id,
+             rootFinder = findRoots,
+             ...) {
+        
         link <- match.arg(link)
 
-        if (link == "identity") {
+        if( is.null(x) ) {
+            
+            return( list(coefficients = NULL,
+                         res = NULL, 
+                         d.res = NULL, 
+                         eq.x = NULL,
+                         optim.object = NULL,
+                         naive.var = NULL))
+
+        } else if (link == "identity") {
 
             y.cent <- .Call("center", y, id, PACKAGE = "drgee")
             x.cent <- .Call("center", x, id, PACKAGE = "drgee")
@@ -24,9 +39,11 @@ geeFitCond <-
 
         } else if (link == "log") {
 
+            x.cent <- .Call("center", x, id, PACKAGE = "drgee")
+            
             ## Create an initial estimate of beta
             ## with intercept being the mean of the outcome
-            intercept.init <- colMeans(y)
+            intercept.init <- log( colMeans(y) )
             beta.init <- geeFit(y = y, x = cbind(rep(intercept.init, nrow(x)), x), link = link)$coefficients[-1]
 
             u.func <- function(beta, arg.list) {
@@ -46,13 +63,13 @@ geeFitCond <-
 
             y.star.hat <- as.vector(y * exp(-x %*% beta.hat))
             
-            d.y.star.hat.beta <- y.star.hat * -x
+            d.y.star.hat.beta <- -x * y.star.hat
             
-            res  <- .Call("center", y.star.hat, id, PACKAGE = "drgee")
+            res  <- .Call("center", as.matrix(y.star.hat), id, PACKAGE = "drgee")
             d.res <- .Call("center", d.y.star.hat.beta, id, PACKAGE = "drgee")
 
             return( list(coefficients = beta.hat,
-                         res = res,
+                         res = as.vector(res),
                          d.res = d.res,
                          eq.x = x.cent,
                          optim.object = root.object$optim.object,
@@ -60,9 +77,13 @@ geeFitCond <-
 
         } else if (link == "logit") {
 
-            x.cent <- .Call("center", x, id, PACKAGE = "drgee")
-            return( condit(y, x.cent, id) )
-
+            return( condit(y = y,
+                           x = x,
+                           y.names = y.names,
+                           x.names = x.names, 
+                           id = id)
+                   )
+            
         }
 
     }

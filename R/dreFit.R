@@ -1,3 +1,40 @@
+dr.logit.eq.func <- function(beta, arg.list) {
+
+    exp.beta.x <- exp( arg.list$x.f %*% beta )
+    exp.beta.ax <- exp( arg.list$ax.f %*% beta )
+    
+    p <- exp.beta.x * arg.list$exp.alpha.z * ( 1 + arg.list$exp.gamma.v )
+    q <- p + 1 + exp.beta.x * arg.list$exp.gamma.v
+    e.star <- as.vector( p / q )
+
+    res.a.e.star <- as.vector(arg.list$a.f - e.star)
+    res.y <- as.vector( arg.list$y.f - 1 + 1/(1 + exp.beta.ax * arg.list$exp.gamma.v) )
+    
+    return( as.vector( crossprod( arg.list$x.f, res.a.e.star * res.y ) ) )
+
+}
+
+
+d.dr.logit.eq.func <- function(beta, arg.list) {
+
+    exp.beta.x <- as.vector(exp( arg.list$x.f %*% beta ))
+    exp.beta.ax <- as.vector(exp( arg.list$ax.f %*% beta ))
+
+    p <- exp.beta.x * arg.list$exp.alpha.z * (1 + arg.list$exp.gamma.v)
+    q <- p + 1 + exp.beta.x * arg.list$exp.gamma.v
+    e.star <- p / q
+
+    res.a.e.star <- as.vector(arg.list$a.f - e.star)
+    res.y <- as.vector( arg.list$y.f - 1 +
+                        1/(1 + exp.beta.ax * arg.list$exp.gamma.v) )
+
+    d.res.a.e.star <- -arg.list$x.f * (e.star / q) * ( q - p - exp.beta.x * arg.list$exp.gamma.v)
+    d.res.y <- -arg.list$ax.f * exp.beta.ax * arg.list$exp.gamma.v / (1 + exp.beta.ax * arg.list$exp.gamma.v)^2
+    
+    return( crossprod( arg.list$x.f , d.res.a.e.star * res.y +
+                                      d.res.y * res.a.e.star ) )
+}
+
 dreFit <-
     function(object, omodel = TRUE, rootFinder = findRoots, ...) {
 
@@ -15,47 +52,26 @@ dreFit <-
             exp.gamma.v <- as.vector(exp( object$v %*% gamma.hat ))
             exp.alpha.z <- as.vector(exp( object$z %*% alpha.hat ))
 
-            eq.func <- function(beta, arg.list) {
+            ## all.args <- c(list(beta.init = beta1.hat,
+            ##                    eq.func = dr.logit.eq.func,
+            ##                    d.eq.func = d.dr.logit.eq.func,
+            ##                    arg.list = list(y.f = object$y,
+            ##                                    ax.f = object$ax,
+            ##                                    a.f = object$a,
+            ##                                    x.f = object$x,
+            ##                                    exp.gamma.v = exp.gamma.v,
+            ##                                    exp.alpha.z = exp.alpha.z)),
+            ##               list(...))
 
-                exp.beta.x <- exp( arg.list$x.f %*% beta )
-                exp.beta.ax <- exp( arg.list$ax.f %*% beta )
-
-                p <- exp.beta.x * arg.list$exp.alpha.z * ( 1 + arg.list$exp.gamma.v )
-                q <- p + 1 + exp.beta.x * arg.list$exp.gamma.v
-                e.star <- as.vector( p / q )
-
-                res.a.e.star <- as.vector(arg.list$a.f - e.star)
-                res.y <- as.vector( arg.list$y.f - 1 + 1/(1 + exp.beta.ax * arg.list$exp.gamma.v) )
-
-                return( as.vector( crossprod( arg.list$x.f, res.a.e.star * res.y ) ) )
-
-            }
-
-            d.eq.func <- function(beta, arg.list) {
-
-                exp.beta.x <- as.vector(exp( arg.list$x.f %*% beta ))
-                exp.beta.ax <- as.vector(exp( arg.list$ax.f %*% beta ))
-
-                p <- exp.beta.x * arg.list$exp.alpha.z * (1 + arg.list$exp.gamma.v)
-                q <- p + 1 + exp.beta.x * arg.list$exp.gamma.v
-                e.star <- p / q
-
-                res.a.e.star <- as.vector(arg.list$a.f - e.star)
-                res.y <- as.vector( arg.list$y.f - 1 + 1/(1 + exp.beta.ax * arg.list$exp.gamma.v) )
-
-                d.res.a.e.star <- -arg.list$x.f * (e.star / q) * ( q - p -
-                                                                  exp.beta.x * arg.list$exp.gamma.v)
-                d.res.y <- -arg.list$ax.f * exp.beta.ax * exp.gamma.v / (1 + exp.beta.ax * arg.list$exp.gamma.v)^2
-
-                return( crossprod( arg.list$x.f , d.res.a.e.star * res.y +
-                                  d.res.y * res.a.e.star ) )
-            }
-
-            all.args <- c(list(beta.init = beta1.hat, eq.func = eq.func,
-                               d.eq.func = d.eq.func,
-                               arg.list = list(y.f = object$y, ax.f = object$ax,
-                                   a.f = object$a, x.f = object$x,
-                                   exp.gamma.v = exp.gamma.v, exp.alpha.z = exp.alpha.z)),
+            all.args <- c(list(beta.init = beta1.hat,
+                               eq.func = dr.logit.eq.func,
+                               d.eq.func = NULL,
+                               arg.list = list(y.f = object$y,
+                                               ax.f = object$ax,
+                                               a.f = object$a,
+                                               x.f = object$x,
+                                               exp.gamma.v = exp.gamma.v,
+                                               exp.alpha.z = exp.alpha.z)),
                           list(...))
 
             ## Call equation solver with beta.init as initial guess and eq.func as estimation function
@@ -88,15 +104,19 @@ dreFit <-
                        cbind(object$yx, object$z) * e.fit$res,
                        cbind(object$ax, object$v) * o.fit$res)
 
-            d.U1.beta <- d.eq.func(beta.hat, all.args$arg.list)
+            ## Derivative of the doubly robust estimating equations
+            d.U1.beta <- d.dr.logit.eq.func(beta.hat, all.args$arg.list)
             d.U1.beta2 <-
                 matrix(rep(0, ncol(object$x) * ncol(object$yx)), nrow = ncol(object$x))
             d.U1.alpha <- crossprod( object$x , d.res.a.e.star.alpha * res.y )
             d.U1.beta1 <-
                 matrix(rep(0, ncol(object$x) * ncol(object$ax)), nrow = ncol(object$x))
             d.U1.gamma <- crossprod( object$x , d.res.a.e.star.gamma * res.y +
-                                    d.res.y.gamma * res.a.e.star )
+                                                d.res.y.gamma * res.a.e.star )
+            d.U1 <- cbind(d.U1.beta, d.U1.beta2, d.U1.alpha, d.U1.beta1, d.U1.gamma)
 
+            ## Derivative of the estimating equations for
+            ## the exposure model
             d.U2.beta <- matrix(rep(0, (ncol(object$yx) + ncol(object$z)) *
                                     ncol(object$ax)), ncol = ncol(object$ax))
             d.U2.beta2 <- crossprod( cbind(object$yx, object$z), e.fit$d.res[,colnames(object$yx)])
@@ -105,7 +125,11 @@ dreFit <-
                                      ncol(object$ax)),ncol = ncol(object$ax))
             d.U2.gamma <- matrix(rep(0, (ncol(object$yx) + ncol(object$z)) *
                                      ncol(object$v)), ncol = ncol(object$v))
-
+            d.U2 <- cbind(d.U2.beta, d.U2.beta2, d.U2.alpha, d.U2.beta1, d.U2.gamma)
+            
+            
+            ## Derivative of the estimating equations for
+            ## the outcome model
             d.U3.beta <- matrix(rep(0, (ncol(object$ax) + ncol(object$v)) *
                                     ncol(object$ax)), ncol = ncol(object$ax))
             d.U3.beta2 <- matrix(rep(0, (ncol(object$ax) + ncol(object$v)) *
@@ -114,10 +138,11 @@ dreFit <-
             d.U3.beta1 <- crossprod( cbind(object$ax, object$v), o.fit$d.res[,colnames(object$ax)])
             d.U3.gamma <- crossprod( cbind(object$ax, object$v), o.fit$d.res[,colnames(object$v)])
 
+            d.U3 <- cbind(d.U3.beta, d.U3.beta2, d.U3.alpha, d.U3.beta1, d.U3.gamma)
+                
             d.U <- rbind( cbind(d.U1.beta, d.U1.beta2, d.U1.alpha, d.U1.beta1, d.U1.gamma),
                          cbind(d.U2.beta, d.U2.beta2, d.U2.alpha, d.U2.beta1, d.U2.gamma),
-                         cbind(d.U3.beta, d.U3.beta2, d.U3.alpha, d.U3.beta1,
-                               d.U3.gamma)
+                         cbind(d.U3.beta, d.U3.beta2, d.U3.alpha, d.U3.beta1, d.U3.gamma)
                          ) / nrow(U)
 
             coefficients <- c(beta.hat, beta2.hat, alpha.hat, beta1.hat, gamma.hat)
@@ -136,9 +161,9 @@ dreFit <-
             }else{
                 
                 v.gamma.hat <- rep(0, nrow(object$y))
+                
             }
             
-
             e.fit <- geeFit(object$a, object$z, object$elink)
             alpha.hat <- e.fit$coefficients
 
@@ -236,6 +261,7 @@ dreFit <-
                 coef.names <- c(object$ax.names, object$z.names, object$ax.names, object$v.names)
 
             } else {
+                
                 U <- cbind(U1, U2)
 
                 d.U <- rbind( cbind(d.U1.beta, d.U1.alpha),
