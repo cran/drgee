@@ -5,14 +5,19 @@ drFit <-
             stop("An object of class \"drgeeData\" is expected")
 	}
 
-        if (object$cond & object$olink=="logit") {
-            stop("Doubly robust conditional estimation with outcome link
-            logit is not possible (yet...).")
+        if (object$cond & object$olink == "logit") {
+            
+            return( drConditFit(object, rootFinder) )
+            
         } else if (object$cond) {
+            
             return( dreFitCond(object, omodel = TRUE,
                                rootFinder = rootFinder, ...) )
+            
         } else {
+            
             return( dreFit(object, omodel = TRUE,
                            rootFinder = rootFinder, ...) )
+            
         }
     }

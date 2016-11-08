@@ -45,27 +45,31 @@ gee <-
             
         } else {
         
-            fit <- geeFit(gee.data$y, gee.data$v, link = link)
+            fit <- geeFit(gee.data$y,
+                          gee.data$v,
+                          link = link)
 
         }
 
         coefficients = fit$coefficients
         names(coefficients) <- gee.data$v.names
 
-        u <- fit$eq.x * fit$res
-
-        d.u <- crossprod( fit$eq.x , fit$d.res ) / nrow(u)
-
-        vcov <- as.matrix( robVcov(u, d.u, gee.data$id) )
-
-        dimnames(vcov) <- list(gee.data$v.names, gee.data$v.names)
-
         y <- as.vector(gee.data$y)[gee.data$orig.order]
         
         x <- gee.data$v[gee.data$orig.order,, drop = FALSE]
         
         colnames(x) <- gee.data$v.names
+
+        ## Calculate asymptotic variance
         
+        U <- fit$eq.x * fit$res
+
+        d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
+
+        vcov <- as.matrix( robVcov(U, d.U, gee.data$id) )
+
+        dimnames(vcov) <- list(gee.data$v.names, gee.data$v.names)
+
         result <- list(coefficients = coefficients,
                        vcov = vcov,
                        call = call,
@@ -109,7 +113,7 @@ summary.gee <-
 
         summ <- summary(object$gee.data)
 
-        if ( ( object$gee.data$cond & ncol(object$gee.data$v) == 0 ) | ( !object$gee.data$cond & ncol(object$gee.data$v) ) ) {
+        if ( ( object$gee.data$cond & ncol(object$gee.data$v) == 0 ) | ( !object$gee.data$cond & ncol(object$gee.data$v) == 1 ) ) {
             model.formula <- paste( object$gee.data$y.names, " ~ 1", sep = "")
         } else {
             model.formula = summ$outcome.nuisance.model

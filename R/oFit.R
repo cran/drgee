@@ -5,6 +5,7 @@ oFit <-
             stop("An object of class \"drgeeData\" is expected")
         }
 
+        ## For retrospective logistic regression
         if(inv){
 
             ## For e-estimation with logit link, 
@@ -12,13 +13,23 @@ oFit <-
             ## and run retrospective logistic regression
 
             if (object$olink != "logit" | object$elink != "logit")
+                
                 stop("\nReverse regression only possible in the logit-logit case\n")
             
             if (object$cond) {
-                fit <- geeFitCond(y = object$a, x = cbind(object$yx, object$z),
-                link = object$olink, id = object$id, ...)
+                
+                fit <- conditFit(y = object$a,
+                                 x = cbind(object$yx, object$z),
+                                 y.names = object$a.names,
+                                 x.names = c(object$yx.names, object$z.names), 
+                                 id = object$id)
+                
             } else {
-                fit <- geeFit(y = object$a, x = cbind(object$yx, object$z), link = object$olink)
+                
+                fit <- geeFit(y = object$a,
+                              x = cbind(object$yx, object$z),
+                              link = object$olink)
+                
             }
 
             coef.names <- c(object$yx.names, object$z.names)
@@ -26,25 +37,28 @@ oFit <-
         } else {
             
             if (object$cond) {
+                
                 fit <- geeFitCond(y = object$y, x = cbind(object$ax, object$v),
-                link = object$olink, id = object$id, ...)
+                                  link = object$olink, id = object$id, ...)
+                
             } else {
+                
                 fit <- geeFit(y = object$y, x = cbind(object$ax, object$v), link = object$olink)
+                
             }
 
             coef.names <- c(object$ax.names, object$v.names)
 
         }
 
-        u <- apply(fit$eq.x, 2, '*', fit$res)
-        d.u <- crossprod( fit$eq.x , fit$d.res ) / nrow(u)
+        U <- apply(fit$eq.x, 2, '*', fit$res)
+        d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
 
         coefficients <- fit$coefficients
         names(coefficients) <- coef.names
 
-        vcov <- robVcov(u, d.u, object$id)
+        vcov <- robVcov(U, d.U, object$id)
         dimnames(vcov) <- list(coef.names, coef.names)
-
 
         result <- list(coefficients = coefficients, vcov = vcov, optim.object = fit$optim.object,
                        optim.object.o = fit$optim.object, optim.object.e = NULL)

@@ -276,15 +276,17 @@ dreFit <-
 
         names(coefficients) <- coef.names
         
-        ## Calculate variance of all estimates
+        ## Calculate the asymptotic variance of all estimates
         
         vcov <- robVcov(U, d.U, object$id)
 
         dimnames(vcov) <- list(coef.names, coef.names)
 
-        result <- list(coefficients = coefficients, vcov = vcov,
+        result <- list(coefficients = coefficients,
+                       vcov = vcov,
                        optim.object = optim.object,
-                       optim.object.o = NULL, optim.object.e = NULL)
+                       optim.object.o = NULL,
+                       optim.object.e = NULL)
 
         return(result)
 

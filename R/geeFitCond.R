@@ -77,11 +77,11 @@ geeFitCond <-
 
         } else if (link == "logit") {
 
-            return( condit(y = y,
-                           x = x,
-                           y.names = y.names,
-                           x.names = x.names, 
-                           id = id)
+            return( conditFit(y = y,
+                              x = x,
+                              y.names = y.names,
+                              x.names = x.names, 
+                              id = id)
                    )
             
         }
