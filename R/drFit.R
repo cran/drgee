@@ -1,17 +1,18 @@
 drFit <-
-    function(object, rootFinder = findRoots, ...){
+    function(object, rootFinder = findRoots, intercept, ...){
 
 	if (class(object)!="drgeeData") {
             stop("An object of class \"drgeeData\" is expected")
 	}
-
+        
         if (object$cond & object$olink == "logit") {
             
-            return( drConditFit(object, rootFinder) )
+            return( drConditFit(object, rootFinder, intercept) )
             
         } else if (object$cond) {
             
-            return( dreFitCond(object, omodel = TRUE,
+            return( dreFitCond(object,
+                               omodel = TRUE,
                                rootFinder = rootFinder, ...) )
             
         } else {

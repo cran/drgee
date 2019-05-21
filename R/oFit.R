@@ -51,17 +51,27 @@ oFit <-
 
         }
 
-        U <- apply(fit$eq.x, 2, '*', fit$res)
-        d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
+        ## U <- apply(fit$eq.x, 2, '*', fit$res)
+        ## d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
+
+        U <- fit$eq.x * fit$res
+        d.U.sum <- crossprod( fit$eq.x , fit$d.res ) 
 
         coefficients <- fit$coefficients
         names(coefficients) <- coef.names
 
-        vcov <- robVcov(U, d.U, object$id)
-        dimnames(vcov) <- list(coef.names, coef.names)
+        ## vcov <- robVcov(U, d.U, object$id)
+        ## dimnames(vcov) <- list(coef.names, coef.names)
 
-        result <- list(coefficients = coefficients, vcov = vcov, optim.object = fit$optim.object,
-                       optim.object.o = fit$optim.object, optim.object.e = NULL)
+        result <- list(coefficients = coefficients,
+                       coef.names = coef.names, 
+                       U = U,
+                       d.U.sum = d.U.sum,
+                       optim.object = fit$optim.object,
+                       optim.object.o = fit$optim.object,
+                       optim.object.e = NULL,
+                       id = object$id,
+                       id.vcov = object$id.vcov)
 
         return(result)
     }

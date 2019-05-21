@@ -19,9 +19,16 @@ geeFitCond <-
                          optim.object = NULL,
                          naive.var = NULL))
 
+        } else if ( !is.matrix(x) ) {
+
+            stop("\n The design matrix is not a matrix\n")
+            
         } else if (link == "identity") {
 
-            y.cent <- .Call("center", y, id, PACKAGE = "drgee")
+            ## Convert y to matrix
+            y.mat <- as.matrix(y)
+
+            y.cent <- .Call("center", y.mat, id, PACKAGE = "drgee")
             x.cent <- .Call("center", x, id, PACKAGE = "drgee")
 
             ## Solve the equation     t(instr) %*% (  y.cent - x.cent %*% beta ) = 0

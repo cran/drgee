@@ -1,18 +1,7 @@
 ## conditFit.R
 
-## Just a wrapper for centering a design matrix
-## around the cluster mean defined by a cluster
-## identification variable id
-centerX <- function(x, id)
-{
-
-    return( .Call("center", x, id, PACKAGE = "drgee") )
-
-}
-
 ## Utility function to obtain the exact score residuals
 ## from clogit::survival
-
 getScoreResidualsFromClogit <-
     function(
              fit,   ## The fitted object
@@ -24,7 +13,7 @@ getScoreResidualsFromClogit <-
 {
     if ( !missing( fit ) ) {
         coefs <- coef(fit)
-    } else if ( missing(fit) ) {
+    } else if ( missing( coefs ) ) {
         stop("\nEither or a fitted object or an estimate of the parameters needs to be supplied");
     }
     
@@ -32,20 +21,27 @@ getScoreResidualsFromClogit <-
         stop("\nThe number of coefficients do not match the number of columns in the design matrix\n\n")
     }
     
-    ## Extract info about clusters
-        
+    ## Extract info about clusters        
     clusters.info <- getDiscordantClustersInfo(y, id)
     disc.clusters <- with(clusters.info, clusters.info[which(disc), ])
 
-    resids <- .Call("conditRes",
+    ## resids <- .Call("conditRes",
+    ##                 coefs, 
+    ##                 disc.clusters$ysum, 
+    ##                 disc.clusters$clust.size, 
+    ##                 disc.clusters$min.idx,
+    ##                 disc.clusters$inv,
+    ##                 as.vector(y),
+    ##                 x,
+    ##                 PACKAGE = "drgee")
+    resids <- .Call(conditRes,
                     coefs, 
                     disc.clusters$ysum, 
                     disc.clusters$clust.size, 
                     disc.clusters$min.idx,
                     disc.clusters$inv,
                     as.vector(y),
-                    x,
-                    PACKAGE = "drgee")
+                    x)
 
     U <- x * as.vector( resids$res )
     
@@ -116,10 +112,6 @@ getDiscordantClustersInfo <-
 
     return( clusters )
     
-    ## disc.clusters <- with(clusters, clusters[which(disc), ])
-
-    ## return( list( disc.clusters = disc.clusters, n.obs = n.obs ) )
-
 }
 
 getResidsFromClogit <-
@@ -128,7 +120,7 @@ getResidsFromClogit <-
              clusters.info,         ## A data table containing info about the clusters
              y,                     ## The observed outcomes
              x,                     ## The observed covariates
-             discordant.only = TRUE ## Use the discordant pairs only
+             discordant.only = FALSE ## Use the discordant pairs only
              )
 {
     ## Extract the needed variables
@@ -171,7 +163,9 @@ conditFit <-
              x.names = colnames(x), 
              id) {
 
-        x.cent <- .Call("center", x, id, PACKAGE = "drgee")
+        ## x.cent <- .Call("center", x, id, PACKAGE = "drgee")
+        x.cent <- x
+        colnames(x.cent) <- x.names
 
         ## Assuming that the observations are sorted by id
         
@@ -181,38 +175,32 @@ conditFit <-
         ## Find the number of parameters
         n.params <- ncol(x.cent) 
         
-        ## ##################################################
+        ## #############################################
         ## Get info about discordant clusters
-        ## ##################################################
+        ## #############################################
 
         clusters.info <- getDiscordantClustersInfo(y, id)
         disc.clusters <- with(clusters.info, clusters.info[which(disc), ])
         
-        ## ##################################################
+        ## #############################################
         ## Create a data frame 
-        ## ##################################################
+        ## #############################################
         
-        ## In case the covariates contains interactions
+        yx.data <- data.frame( y, x.cent, id)
 
-        new.x.names <- gsub(":", "", x.names)
-        colnames(x.cent) <- new.x.names
-
-        yx.data <- data.frame(y, x.cent, id)
+        ## Make sure the names are correct
+        id.names <- names(yx.data)[length(names(yx.data))]
+        names(yx.data) <- c(y.names, x.names, id.names)
         
-        ## ##################################################
+        ## ##############################################
         ## Create a formula object to be used for clogit
-        ## ##################################################
+        ## ##############################################
         
-        oformula <- formula( paste(y.names,
-                                   " ~ ",
-                                   paste(new.x.names,
-                                         collapse = " + "),
-                                   " + strata(id)", 
-                                   sep = "") )
+        oformula <- reformulate( c(x.names, "strata(id)"), y.names)
 
-        ## ##################################################
+        ## ##############################################
         ## Fit using clogit
-        ## ##################################################
+        ## ##############################################
 
         fit.clogit <- survival::clogit(oformula,
                                        data = yx.data, 
@@ -221,7 +209,11 @@ conditFit <-
         
         beta.hat <- coef(fit.clogit)
 
-        resids <- getResidsFromClogit( beta.hat, clusters.info, y, x.cent )
+        resids <- getResidsFromClogit(beta.hat,
+                                      clusters.info,
+                                      y,
+                                      x.cent,
+                                      discordant.only = TRUE)
 
         eq.res <- as.vector( resids$res )
         
@@ -241,6 +233,7 @@ conditFit <-
                      d.res = d.eq.res,
                      eq.x = x.cent,
                      optim.object = NULL,
-                     naive.var = naive.var) )
+                     naive.var = naive.var
+                     ) )
         
     }

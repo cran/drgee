@@ -7,10 +7,13 @@ drgee <-
              olink = c("identity", "log", "logit"),
              elink = c("identity", "log", "logit"),
              data,
+             subset = NULL, 
              estimation.method = c("dr", "o", "e"),
              cond = FALSE,
              clusterid,
+             clusterid.vcov,
              rootFinder = findRoots,
+             intercept = TRUE, 
              ...
              ) {
 
@@ -42,8 +45,10 @@ drgee <-
                      "eformula", "elink", "exposure",
                      "cond",
                      "data",
+		     "subset",
                      "estimation.method", 
-                     "clusterid"),
+                     "clusterid",
+                     "clusterid.vcov"),
                    names(call), 0L)
 
         dD <- call[c(1L, m)]
@@ -57,16 +62,29 @@ drgee <-
         } else if (estimation.method == "e") {
             fit <- eFit(drgee.data, rootFinder, ...)
         } else if (estimation.method == "dr") {
-            fit <- drFit(drgee.data, rootFinder, ...)
+            fit <- drFit(drgee.data, rootFinder, intercept, ...)
         }
 
+        ## Calculate variance based on the estimating equations
+        if( !is.null(fit$id.vcov) ){
+            
+            vcov <- as.matrix( robustVcov(fit$U, fit$d.U.sum, fit$id.vcov) )
+
+        } else {
+            
+            vcov <- as.matrix( robustVcov(fit$U, fit$d.U.sum, fit$id) )
+
+        }
+
+        dimnames(vcov) <- list( fit$coef.names, fit$coef.names)
+        
         fit$call <- call
 
         fit$coefficients.all <- fit$coefficients
         fit$coefficients <- fit$coefficients[1:ncol(drgee.data$ax)]
 
-        fit$vcov.all <- fit$vcov
-        fit$vcov <- fit$vcov[1:ncol(drgee.data$ax), 1:ncol(drgee.data$ax), drop = F]
+        fit$vcov.all <- vcov
+        fit$vcov <- vcov[1:ncol(drgee.data$ax), 1:ncol(drgee.data$ax), drop = F]
 
         fit$drgee.data <- drgee.data
 
@@ -161,6 +179,40 @@ coef.drgee <- function(object, ...) {
 }
 
 vcov.drgee <- function(object, ...) {
+    
     return(object$vcov)
+
 }
+
+naiveVcov.drgee <- function(object) {
+    
+    d.U <- object$d.U.sum / object$drgee.data$n.obs
+    return( -solve( d.U ) )
+    
+}
+
+clusterRobustVcov.drgee <- function(object, clusterid = NULL){
+
+    n.params <- length( object$coefficients )
+    
+    if( is.null(clusterid) ){
+        
+        return( object$vcov.all[1:n.params, 1:n.params])
+            
+    } else {
+            
+        if ( is.character(clusterid) ) {
+                
+            clusterid <- get(clusterid, envir = parent.frame())
+                
+        }
+
+        clusterid.reordered <- clusterid[object$drgee.data$used.rows]
+        
+        return( robustVcov(object$U,
+                           object$d.U.sum,
+                           id = clusterid.reordered)[1:n.params, 1:n.params] )
+    }
+}
+
 

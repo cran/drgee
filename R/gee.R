@@ -2,8 +2,10 @@ gee <-
     function (formula,
               link = c("identity","log","logit"),
               data,
+              subset, 
               cond = FALSE,
               clusterid,
+              clusterid.vcov,
               rootFinder = findRoots,
               ...
               ) {
@@ -12,7 +14,7 @@ gee <-
 
         link <- match.arg(link)
 
-        m <- match(c("data", "clusterid", "cond"), names(call), 0L)
+        m <- match(c("data", "subset", "cond", "clusterid", "clusterid.vcov"), names(call), 0L)
 
         dD <- call[c(1L, m)]
         dD$oformula <- formula
@@ -40,7 +42,6 @@ gee <-
                                   link = link,
                                   gee.data$id,
                                   rootFinder, ...)
-                    
                 }
             
         } else {
@@ -54,21 +55,73 @@ gee <-
         coefficients = fit$coefficients
         names(coefficients) <- gee.data$v.names
 
-        y <- as.vector(gee.data$y)[gee.data$orig.order]
-        
-        x <- gee.data$v[gee.data$orig.order,, drop = FALSE]
-        
-        colnames(x) <- gee.data$v.names
+        n.obs <- gee.data$n.obs
+        n.vars <- ncol(gee.data$v)
+        used.rows <- gee.data$used.rows
 
+        ## x <- matrix(NA, n.obs, n.vars)
+        ## x[used.rows, ] <- gee.data$v
+        ## rownames(x) <- gee.data$rownames.orig
+        x <- gee.data$v[gee.data$orig.order,, drop = F]
+
+        obs.names <- rownames(x)
+        
+        ## y <- rep(NA, n.obs)
+        ## ## y[used.rows] <- as.vector(gee.data$y)[gee.data$orig.order]
+        ## y[used.rows] <- as.vector(gee.data$y)
+        ## ## names(y) <- gee.data$y.names
+        y <- as.vector(gee.data$y[gee.data$orig.order])
+        names(y) <- obs.names
+
+        res <- as.vector(fit$res[gee.data$orig.order])
+        names(res) <- obs.names
+
+        d.res <- fit$d.res[gee.data$orig.order,, drop = F]
+        ## x <- matrix( rep(NA, n.vars * gee.data$n.obs), ncol = n.vars )
+        ## x[gee.data$used.rows, ] <- gee.data$v
+        ## colnames(x) <- gee.data$v.names
+        ## rownames(x) <- 1:n.obs
         ## Calculate asymptotic variance
         
         U <- fit$eq.x * fit$res
 
-        d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
+        ## d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
 
-        vcov <- as.matrix( robVcov(U, d.U, gee.data$id) )
+        d.U.sum <- crossprod( fit$eq.x , fit$d.res )
+
+        if( !is.null(gee.data$id.vcov) ){
+            
+            vcov <- as.matrix( robustVcov(U, d.U.sum, gee.data$id.vcov) )
+
+        } else {
+            
+            vcov <- as.matrix( robustVcov(U, d.U.sum, gee.data$id) )
+
+        }
 
         dimnames(vcov) <- list(gee.data$v.names, gee.data$v.names)
+
+        ## result <- list(coefficients = coefficients,
+        ##                vcov = vcov,
+        ##                call = call,
+        ##                cond = cond,
+        ##                y = y,
+        ##                x = x,
+        ##                gee.data = gee.data, 
+        ##                optim.object = fit$optim.object,
+        ##                res = fit$res[gee.data$orig.order],
+        ##                d.res = fit$d.res[gee.data$orig.order,, drop = FALSE],
+        ##                naive.var = naive.var)
+
+        ## res <- rep(NA, n.obs)
+        ## res[used.rows] <- fit$res
+        
+        ## d.res <- matrix(NA, n.obs, n.vars)
+        ## d.res[used.rows, ] <- fit$d.res
+        ## d.res <- fit$res[gee.data$orig.order,, drop = F]
+
+        ## res <- as.vector(fit$res[gee.data$orig.order])
+        ## d.res <- fit$res[gee.data$orig.order,, drop = F]
 
         result <- list(coefficients = coefficients,
                        vcov = vcov,
@@ -78,9 +131,19 @@ gee <-
                        x = x,
                        gee.data = gee.data, 
                        optim.object = fit$optim.object,
-                       res = fit$res[gee.data$orig.order],
-                       d.res = fit$d.res[gee.data$orig.order,, drop = FALSE],
+                       U = U,
+                       d.U.sum = d.U.sum,
+                       res = res, 
+                       d.res = d.res, 
+                       ## res = fit$res,
+                       ## d.res = fit$d.res,
                        naive.var = naive.var)
+
+        ## if( cond & link == "logit") {
+            
+        ##     result$clusters.info <- fit$clusters.info
+            
+        ## }
 
         class(result) <- "gee"
 
@@ -163,6 +226,36 @@ coef.gee <- function(object, ...) {
 }
 
 vcov.gee <- function(object, ...) {
+    
     return(object$vcov)
+}
+
+naiveVcov.gee <- function(object) {
+    
+    d.U <- object$d.U.sum / object$gee.data$n.obs
+    return( -solve( d.U ) )
+    
+}
+
+clusterRobustVcov.gee <- function(object, clusterid = NULL){
+
+    if(is.null(clusterid)){
+        
+        return( object$vcov )
+            
+    }else{
+            
+        if ( is.character(clusterid) ) {
+                
+            clusterid <- get(clusterid, envir = parent.frame())
+                
+        }
+
+        clusterid.reordered <- clusterid[object$gee.data$used.rows]
+        
+        return( robustVcov(object$U,
+                           object$d.U.sum,
+                           id = clusterid.reordered) )
+    }
 }
 

@@ -19,8 +19,9 @@ drgeeData(outcome, exposure,
           oformula, eformula, iaformula = formula(~1),
           olink = c("identity", "log", "logit"),
           elink = c("identity", "log", "logit"),
-          data, estimation.method = c("dr", "o", "e"),
-          cond = FALSE, clusterid)
+          data, subset = NULL,
+          estimation.method = c("dr", "o", "e"),
+          cond = FALSE, clusterid, clusterid.vcov)
 }
 
 \arguments{
@@ -75,6 +76,10 @@ drgeeData(outcome, exposure,
     expected to be found in the calling frame.
   }
 
+  \item{subset}{
+    An optional vector defining a subset of the data to be used.
+  }
+
   \item{estimation.method}{
     A character string naming the desired estimation method. Choose
     \code{"o"} for O-estimation,
@@ -97,6 +102,16 @@ drgeeData(outcome, exposure,
     argument is required when \code{cond = TRUE}.
   }
 
+  \item{clusterid.vcov}{
+    A cluster-defining variable or a character string naming a
+    cluster-defining variable in the \code{data} argument to be used for
+    adding contributions from the same cluster. These clusters can be
+    different from the clusters defined by \code{clusterid}. However,
+    each cluster defined by \code{clusterid} needs to be contained in
+    exactly one cluster defined by \code{clusterid.vcov}. This variable
+    is useful when the clusters are hierarchical.
+  }
+
 }
 \details{
   \code{drgeeData} is called by \code{drgee} and \code{gee} to extract
@@ -114,6 +129,8 @@ drgeeData(outcome, exposure,
 \value{
   \code{drgee.data } returns an object of class \code{drgeeData}
   containing
+  \item{used.rows }{The rows numbers in the original data for the used
+  rows (after subset selection and exlusions). }
   \item{orig.order }{The original order of the observations. }
   \item{y }{The outcome matrix.}
   \item{a }{The exposure matrix.}

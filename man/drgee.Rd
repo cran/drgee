@@ -6,12 +6,14 @@
 \alias{print.drgee}
 \alias{summary.drgee}
 \alias{print.summary.drgee}
+\alias{naiveVcov.drgee}
+\alias{clusterRobustVcov.drgee}
 \title{Doubly Robust Generalized Estimating Equations}
 \description{
-  \code{drgee} performs O-estimation,
-  E-estimation or DR-estimation
-  given symbolic representations of an outcome nuisance model and
-  an exposure nuisance model. For clustered data the nuisance models may
+  \code{drgee} is used to estimate an exposure-outcome effect adjusted
+  for  additional covariates. The estimation is based on regression
+  models for the outcome, exposure or a combination of both.
+  For clustered data the models may
   have cluster-specific intercepts.
 }
 \usage{
@@ -19,9 +21,9 @@ drgee(outcome, exposure,
       oformula, eformula, iaformula = formula(~1),
       olink = c("identity", "log", "logit"),
       elink = c("identity", "log", "logit"),
-      data, estimation.method = c("dr", "o", "e"),
-      cond = FALSE, clusterid, rootFinder = findRoots,
-       ...)
+      data, subset = NULL, estimation.method = c("dr", "o", "e"),
+      cond = FALSE, clusterid, clusterid.vcov, rootFinder = findRoots,
+      intercept = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -70,6 +72,10 @@ drgee(outcome, exposure,
     calling environment of the calling environment.
   }
 
+  \item{subset}{
+    An optional vector defining a subset of the data to be used.
+  }
+
   \item{estimation.method}{
     A character string naming the desired estimation method. Choose
     \code{"o"} for O-estimation,
@@ -95,6 +101,22 @@ drgee(outcome, exposure,
     a separate cluster. This argument is required when \code{cond = TRUE}.
   }
 
+  \item{clusterid.vcov}{
+    A cluster-defining variable or a character string naming a
+    cluster-defining variable in the \code{data} argument to be used for
+    adding contributions from the same cluster. These clusters can be
+    different from the clusters defined by \code{clusterid}. However,
+    each cluster defined by \code{clusterid} needs to be contained in
+    exactly one cluster defined by \code{clusterid.vcov}. This variable
+    is useful when the clusters are hierarchical.
+  }
+
+  \item{intercept}{
+    A boolean to choose whether the nuisance parameters in doubly robust
+    conditional logistic regression should be fitted with a model with an
+    intercept. Only used for doubly robust condtional logistic regression.
+  }
+  
   \item{\dots}{
     Further arguments to be passed to the function \code{rootFinder}.
   }
@@ -304,6 +326,9 @@ summary(e.est)
 
   Tchetgen E.J.T., Robins J.M., Rotnitzky A. (2010), On Doubly Robust
   Estimation in a Semiparametric Odds Ratio Model, \emph{Biometrika},
-  \bold{97},
-  1, 171--180
+  \bold{97}, 1, 171--180
+
+  Zetterqvist J., Vansteelandt S., Pawitan Y.,
+  \enc{Sjölander}{Sjolander} (2016), Doubly Robust Methods for Handling
+  Confounding by Cluster, \emph{Biostatistics}, \bold{17}, 2, 264--276
 }

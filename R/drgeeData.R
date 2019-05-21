@@ -7,9 +7,11 @@ drgeeData <-
              olink = c("identity","log","logit"),
              elink = c("identity","log","logit"),
              data,
+             subset = NULL, 
              estimation.method = c("dr", "o", "e"),
              cond = FALSE,
-             clusterid
+             clusterid,
+             clusterid.vcov
              ) {
 
         call <- match.call()
@@ -75,11 +77,38 @@ drgeeData <-
 
         }
 
+        if ( is.data.frame(data) | is.matrix(data) ) {
+            rownames.orig <- rownames(data)
+        } else {
+            rownames.orig <- NULL
+        }
+        
         if (!missing(oformula)) {
             
             oterms <- terms(oformula)
-            omf <- model.frame(formula = oformula, data = data, na.action =
-            na.pass, drop.unused.levels = TRUE)
+            
+            omf <- model.frame(formula = oformula,
+                               data = data,
+                               na.action = na.pass,
+                               drop.unused.levels = TRUE)
+
+            ## if ( !missing(subset) ) {
+                
+            ## omf <- model.frame(formula = oformula,
+            ##                    data = data,
+            ##                    subset = subset, 
+            ##                    na.action = na.pass,
+            ##                    drop.unused.levels = TRUE)
+
+            ## } else {
+
+            ##     omf <- model.frame(formula = oformula,
+            ##                        data = data,
+            ##                        na.action = na.pass,
+            ##                        drop.unused.levels = TRUE)
+
+            ## }
+
             ## we define the outcome as the response in the oformula
             if (attr(oterms,"response")) {
             ## we define the outcome as the response in the oformula
@@ -98,7 +127,7 @@ drgeeData <-
                 oterms <- NULL;
                 outname <- NULL;
             }
-            
+
         }
 
         ## Extract the outcome if it is given
@@ -124,7 +153,9 @@ drgeeData <-
         }
 
         if (is.null(outname)) {
+            
             stop("An outcome needs to be specified\n\n")
+            
         } else {
 
             tempof <- formula(paste("~", outname))
@@ -133,8 +164,24 @@ drgeeData <-
                 environment(tempof) <- data
             }
 
-            yf <- model.frame(tempof, data = data, na.action = na.pass,
-                              drop.unused.levels = TRUE)
+            ## if ( !missing(subset) ) {
+                
+            ##     yf <- model.frame(formula = tempof,
+            ##                       data = data,
+            ##                       subset = subset, 
+            ##                       na.action = na.pass,
+            ##                       drop.unused.levels = TRUE)
+
+            ## } else {
+
+                yf <- model.frame(formula = tempof,
+                                  data = data,
+                                  na.action = na.pass,
+                                  drop.unused.levels = TRUE)
+                
+            ## }
+            
+
             y.all <- model.matrix(tempof, yf)
 
             if (dim(y.all)[2] != 2) {
@@ -148,36 +195,52 @@ or a factor with two levels\n\n")
             outname <- colnames(y)
 
             if (!response.ok(y[, 1, drop=TRUE], link = olink)) {
+                
                 stop("\nBad outcome!\n\n")
+                
             }
 
-            nobs <- nrow(y)
+            n.obs <- nrow(y)
 
             ## Identify complete observations
-            compl.rows <- !is.na(y[, 1])
-
+            complete.rows <- !is.na(y[, 1])
             
+            ## The observation id
+            obs.id <- 1:n.obs
         }
 
-        ## Check that we have the same number of observations for all given
-        ## objects
-        if (!is.null(oterms) & !length(attr(oterms, "term.labels")) == 0) {
-            if (nrow(omf) != nobs) {
-                stop("The should be as many outcome as outcome nuisance model observations\n\n")
+        ## Check that we have the same number of
+        ## observations for all given objects
+        if (!is.null(oterms) & length(attr(oterms, "term.labels")) != 0) {         
+            if (nrow(omf) != n.obs) {
+                stop("There should be as many outcomes as outcome nuisance model observations\n\n")
             } else {
-                compl.rows <- compl.rows & !rowSums(is.na(omf))
+                complete.rows <- complete.rows & !rowSums( is.na(omf) )
             }
         }
 
         if (!missing(eformula)) {
 
             eterms <- terms(eformula)
-            emf <- model.frame(formula = eformula, data = data, na.action = na.pass, drop.unused.levels = TRUE)
+            ## if ( !missing(subset) ) {    
+            ##     emf <- model.frame(formula = eformula,
+            ##                        data = data,
+            ##                        subset = subset, 
+            ##                        na.action = na.pass,
+            ##                        drop.unused.levels = TRUE)
+            ## } else {
 
-            if (!length(attr(eterms, "term.labels")) == 0 & nrow(emf) != nobs) {
-                stop("The should be as many outcome as exposure nuisance model observations\n\n")
+            emf <- model.frame(formula = eformula,
+                               data = data,
+                               na.action = na.pass,
+                               drop.unused.levels = TRUE)
+            
+            ## }
+
+            if (!length(attr(eterms, "term.labels")) == 0 & nrow(emf) != n.obs) {
+                stop("There should be as many outcome as exposure nuisance model observations\n\n")
             } else {
-                compl.rows <- compl.rows & !rowSums(is.na(emf))
+                complete.rows <- complete.rows & !rowSums(is.na(emf))
             }
 
             if (attr(eterms,"response")) {
@@ -189,19 +252,16 @@ or a factor with two levels\n\n")
             }
 
         } else {
-
             if(estimation.method %in% c("dr", "e")) {
                 stop("\nAn exposure nuisance model is needed\n\n");
             } else {
                 eterms <- NULL
                 expname <- NULL
             }
-
         }
 
         ## Extract the exposure if it is given
         if (!missing(exposure)) {
-
             ## If the exposure is not given as a string
             ## get the name of the object that was given
             ## as input
@@ -226,7 +286,21 @@ or a factor with two levels\n\n")
                 environment(tempef) <- data
             }
 
-            af <- model.frame(tempef, data = data, na.action = na.pass, drop.unused.levels = TRUE)
+            ## if ( !missing(subset) ) {
+            ##     af <- model.frame(formula = tempef,
+            ##                       data = data,
+            ##                       subset = subset, 
+            ##                       na.action = na.pass,
+            ##                       drop.unused.levels = TRUE)
+            ## } else {
+            
+            af <- model.frame(formula = tempef,
+                              data = data,
+                              na.action = na.pass,
+                              drop.unused.levels = TRUE)
+                
+            ## }
+            
             a.all <- model.matrix(tempef, af)
 
             if (dim(a.all)[2] != 2) {
@@ -239,10 +313,10 @@ or a factor with two levels\n\n")
             ## Update the column names if the outcome was not numeric
             a.names <- colnames(a)
 
-            if ( nrow(a) != nobs) {
+            if ( nrow(a) != n.obs) {
                 stop("The should be as many outcome as exposure observations\n\n")
             } else {
-                compl.rows <- compl.rows & !is.na(as.vector(a))
+                complete.rows <- complete.rows & !is.na(as.vector(a))
             }
 
             if (estimation.method %in% c("dr", "e")) {
@@ -258,40 +332,48 @@ or a factor with two levels\n\n")
         }
 
         if (!missing(iaformula)) {
-
             iaterms <- terms(iaformula)
-            iamf <- model.frame(formula = iaformula, data = data,
-                                na.action = na.pass, drop.unused.levels = TRUE)
-
+            ## if ( !missing(subset) ) {
+            ##     iamf <- model.frame(formula = iaformula,
+            ##                        data = data,
+            ##                        subset = subset, 
+            ##                        na.action = na.pass,
+            ##                        drop.unused.levels = TRUE)
+            ## } else {
+            
+            iamf <- model.frame(formula = iaformula,
+                                data = data,
+                                na.action = na.pass,
+                                drop.unused.levels = TRUE)
+                
+            ## }
+            
             if (length(attr(iaterms, "term.labels")) == 0) {
                 iaterms <- NULL
             } else {
-                if (nrow(iamf) != nobs) {
+                if (nrow(iamf) != n.obs) {
                     stop("The should be as many outcome as interaction observations\n\n")
                 } else {
-                    compl.rows <- compl.rows & !rowSums(is.na(iamf))
+                    complete.rows <- complete.rows & !rowSums(is.na(iamf))
                 }
             }
-
         } else {
             iaterms <- NULL
         }
 
         ## Get the clusterid if it is given and create a clusterid otherwise
         if (!missing(clusterid)) {
-
             if (is.character(clusterid)) {
                 clustname <- clusterid
                 if (is.environment(data)) {
-                    id <- get(clustname, envir = data)
+                    id.orig <- get(clustname, envir = data)
                 } else if (is.data.frame(data)) {
-                    id <- data[clustname]
+                    id.orig <- data[clustname]
                 } else if (is.matrix(data)) {
-                    id <- data[, clustname]
+                    id.orig <- data[, clustname]
                 } else {
-                    stop(paste("The clusterid ", clusterid, " could not be found\n\n"))
+                    stop(paste("The clusterid ", clustname, " could not be found\n\n"))
                 }
-
             } else {
                 clustarg <- call[["clusterid"]]
                 if( is.character(clustarg) ) {
@@ -300,86 +382,280 @@ or a factor with two levels\n\n")
                     clustname.tmp <- as.character(clustarg)
                     clustname <- clustname.tmp[length(clustname.tmp)]
                 }
-                
-                id <- as.vector(clusterid)
+                id.orig <- as.vector(clusterid)
             }
 
-            if (is.list(id)) {
-                id <- unlist(id)
+            if (is.list(id.orig)) {
+                id.orig <- unlist(id.orig)
             } else {
-                id <- as.vector(id)
+                id.orig <- as.vector(id.orig)
             }
-
-            if (length(id) != nobs) {
-                stop("Each observation needs to have exactly one observation of the clusterid\n\n")
-            }
-
-            compl.rows <- compl.rows & !is.na(id)
-
+            ## if ( !is.null(subset)) {
+                ## id.orig <- id.orig[subset]
+            ## }
+            complete.rows <- complete.rows & !is.na(id.orig)
         } else {
             if (cond) {
                 stop("For conditional methods, clusterid is required\n\n")
             } else {
-                id <- 1:nrow(y)
+                id.orig <- 1:nrow(y)
                 clustname <- "id"
             }
         }
 
-        ## Make sure that the data is sorted by the cluster variable
-        if (is.unsorted(id, na.rm = TRUE)) {
-            obs.order <- order(id)
-            ## The permutation of complete rows (boolean)
-            compl.rows <- compl.rows[obs.order]
+        ## Get the clusterid if it is given and create a clusterid otherwise
+        if ( !missing(clusterid.vcov) ) {
+            if ( is.null(clusterid.vcov ) ) {
+                id.vcov <- NULL
+                clustname.vcov <- NULL
+            } else if ( is.character(clusterid.vcov) ) {
+                clustname.vcov <- clusterid.vcov
+                if (is.environment(data)) {
+                    id.vcov <- get(clustname.vcov, envir = data)
+                } else if (is.data.frame(data)) {
+                    id.vcov <- data[clustname.vcov]
+                } else if (is.matrix(data)) {
+                    id.vcov <- data[, clustname.vcov]
+                } else {
+                    stop(paste("The clusterid ", clustname.vcov, " could not be found\n\n"))
+                }
+            } else {
+                clustarg.vcov <- call[["clusterid.vcov"]]
+                if( is.character(clustarg.vcov) ) {
+                    clustname.vcov <- clustarg.vcov
+                } else {
+                    clustname.vcov.tmp <- as.character(clustarg.vcov)
+                    clustname.vcov <- clustname.vcov.tmp[length(clustname.vcov.tmp)]
+                }
+                
+                id.vcov <- as.vector(clusterid.vcov)
+            }
+
+            if (is.list(id.vcov)) {
+                id.vcov <- unlist(id.vcov)
+            } else {
+                id.vcov <- as.vector(id.vcov)
+            }
+
+            ## if ( !is.null(subset)) {
+            ##     id.vcov <- id.vcov[subset]
+            ## }
+            
+            complete.rows <- complete.rows & !is.na(id.vcov)
+
         } else {
-            obs.order <- 1:nobs
+            
+            id.vcov <- NULL
+            clustname.vcov <- NULL
+            
         }
 
-        nobsnew <- sum(compl.rows)
+        ## browser()
 
-        ## Get the row numbers that we will use
-        rows.to.use <- obs.order[which(compl.rows)]
+        ## #######################################################
+        ## Identify observations that are in the subset
+        ## #######################################################
+        if ( missing(subset) ){
+            subset.rows <- complete.rows
+        } else if (is.null(subset) ) {
+            subset.rows <- complete.rows
+        } else if ( !is.numeric(subset) ) {
+            stop("\n subset needs to be a non-empty numeric vector\n")
+        } else {
+            subset.rows <- obs.id %in% subset
+        }
 
-        ## Extract observations for complete observations
-        id <- as.factor(id[rows.to.use])
-        y <- y[rows.to.use,, drop = F]
+        use.rows <- complete.rows & subset.rows
+
+        ## For conditional methods, remove clusters with one observation only
+        if ( cond ) {
+            use.id <- id.orig[which(use.rows)]
+            id.counts <- table(use.id)
+            id.keep <- as.numeric(names(id.counts)[which(id.counts > 1)])
+            id.rows <- id.orig %in% id.keep
+            use.rows <- use.rows & id.rows
+        }
+
+        ## #######################################################
+        ## Extract observations as defined by the subset argument
+        ## #######################################################
+        use.rows.idx <- which(use.rows)
+        
+        if ( missing(subset) ){
+            rows.idx <- use.rows.idx
+        } else if ( !is.numeric(subset) ) {
+            stop("\n subset needs to be a non-empty numeric vector\n")
+        } else {    
+            rows.idx <- subset[which(subset %in% use.rows.idx)]
+        }
+
+        ## Extract ids as defined by the subset argument
+        ## and after exclusions
+        id.ss <- id.orig[rows.idx]
+
+        ## Make sure that the data is sorted by the cluster variable
+        id.order <- order(id.ss)
+        ## The rows from the original dataset after exclusions and subset selection
+        idx <- rows.idx[id.order]
+            
+        ## Create the id variable
+        id <- id.orig[idx]
+        
+        ## ## Make sure that the data is sorted by the cluster variable
+        ## if (is.unsorted(id.ss, na.rm = TRUE)) {            
+        ##     id.order <- order(id.ss)
+        ## } else {
+        ##     id.order <- 1:n.obs
+        ## }
+
+        ## The rows that are used, in that order and allowing duplicated rows
+        ## rows.used <- rows.idx[id.order]
+        ## id
+        ## new.order can be used to sort the data by id
+        ## example orig.var[new.order] 
+        
+        
+        ## rows.to.use <- subset[which(subset %in% complete.rows.idx)]
+
+        ## id.ordered <- id.orig[new.order]
+        ## complete.rows.ordered <- complete.rows[new.order]
+
+        ## rows.to.use.2 <- rows.to.use[new.order]
+
+        ## ## The indices (rownumbers) of the complete rows
+        ## complete.rows.idx <- which(complete.rows)
+
+        ## ## For conditional methods, remove clusters with one observation only
+        ## if ( cond ) {
+        ##     id.counts <- table(id.orig)
+        ##     id.keep <- as.numeric(names(id.counts)[which(id.counts > 1)])
+        ##     id.rows.to.keep <- which(id.orig %in% id.keep)
+        ##     rows.to.use <- rows.to.use[which(rows.to.use %in% id.rows.to.keep)]
+        ## }
+        
+        ## id <- id.orig[rows.to.use]
+
+        ## ## #######################################################
+        ## ## Extract only those observations that are in the subset
+        ## ## #######################################################
+        ## if ( missing(subset) ){
+        ##     rows.to.use <- complete.rows.idx
+        ## } else if ( !is.numeric(subset) ) {
+        ##     stop("\n subset needs to be a non-empty numeric vector\n")
+        ## } else {    
+        ##     rows.to.use <- subset[which(subset %in% complete.rows.idx)]
+        ## }
+
+
+
+        ## ## The permutation of complete rows (boolean)
+        ## complete.rows.new.bool <- complete.rows[new.order]
+        
+        ## ## The permutation of complete rows (rownumbers)
+        ## complete.rows.new.idx <- which(complete.rows.new.bool)
+        
+        ## ## Calculate the number of complete observations
+        ## n.obs.new <- sum(complete.rows.new.bool)
+
+        ## ## Get the obs numbers in the original dataset that we will use
+        ## ## This variable is useful if we want to transform a variable
+        ## ## with the original observation order to the order used
+        ## ## in the transformed variable
+        ## rows.to.use <- new.order[ which(complete.rows.new) ]
+
+        ## ## Make sure that the data is sorted by the cluster variable
+        ## ## new.order can be used to sort the data by id
+        ## ## example orig.var[new.order] 
+        ## if (is.unsorted(id, na.rm = TRUE)) {            
+        ##     new.order <- order(id)
+        ## } else {
+        ##     new.order <- 1:n.obs
+        ## }
+
+        ## ## The permutation of complete rows (boolean)
+        ## complete.rows.new.bool <- complete.rows[new.order]
+        
+        ## ## The permutation of complete rows (rownumbers)
+        ## complete.rows.new.idx <- which(complete.rows.new.bool)
+        
+        ## ## Calculate the number of complete observations
+        ## n.obs.new <- sum(complete.rows.new.bool)
+
+        ## ## Get the obs numbers in the original dataset that we will use
+        ## ## This variable is useful if we want to transform a variable
+        ## ## with the original observation order to the order used
+        ## ## in the transformed variable
+        ## complete.rows.orig <- new.order[ complete.rows.new.idx ]
+
+        ## ## Extract only those observations that are in the subset
+        ## if ( missing(subset) ){
+        ##     rows.to.use <- complete.rows.orig
+        ## } else if ( !is.numeric(subset) ) {
+        ##     stop("\n subset needs to be a non-empty numeric vector\n")
+        ## } else {    
+        ##     rows.to.use <- subset[which(subset %in% complete.rows.orig)]
+        ## }
+
+        if (!is.null(rownames.orig)) {
+            rownames.new <- rownames.orig[idx]
+        } else {
+            rownames.new <- NULL
+        }
+
+        if( !is.null(id.vcov) ) {            
+            id.vcov <- as.factor(id.vcov[idx])
+            names(id.vcov) <- rownames.new
+        }
+
+        names(id) <- rownames.new
+
+        y <- y[idx,, drop = F]
         y.names <- colnames(y)
+        rownames(y) <- rownames.new
+
 
         if (!is.null(a)) {
-            a <- a[rows.to.use,, drop = F]
+            a <- a[idx,, drop = F]
+            rownames(a) <- rownames.new
+
         }
 
         ## Extract covariates
         if (!is.null(oterms)) {
-            v <- model.matrix(oterms, omf)[rows.to.use,, drop = F]
+            v <- model.matrix(oterms, omf)[idx,, drop = F]
             v.names <- colnames(v)
+            rownames(v) <- rownames.new
         } else {
             v <- NULL
             v.names <- NULL
         }
 
         if (!is.null(eterms)) {
-            z <- model.matrix(eterms, emf)[rows.to.use,, drop = F]
+            z <- model.matrix(eterms, emf)[idx,, drop = F]
             z.names <- colnames(z)
+            rownames(z) <- rownames.new
         } else {
             z <- NULL
             z.names <- NULL
         }
 
-
         if ( !is.null(iaterms) ) {
 
             if ( length(attr(iaterms, "term.labels")) == 0 ) {
-                x <- matrix( rep(1, nobsnew), ncol = 1)
+                x <- matrix( rep(1, length(idx)), ncol = 1)
                 x.names <- "(Intercept)"
                 colnames(x) <- x.names
+                rownames(x) <- rownames.new
             } else {
-                x <- model.matrix(iaterms, iamf)[rows.to.use,, drop = F]
+                x <- model.matrix(iaterms, iamf)[idx,, drop = F]
                 x.names <- colnames(x)
+                rownames(x) <- rownames.new
             }
         } else {
-            x <- matrix( rep(1, nobsnew), ncol = 1)
+            x <- matrix( rep(1, length(idx)), ncol = 1)
             x.names <- "(Intercept)"
             colnames(x) <- x.names
+            rownames(x) <- rownames.new
         }
 
         if (olink == "logit") {
@@ -387,7 +663,8 @@ or a factor with two levels\n\n")
             yx.names[1] <- y.names
             yx.names[-1] <- paste(y.names, x.names[-1], sep = ":")
             yx <- x * as.vector(y)
-            dimnames(yx) <- list(rownames(yx), yx.names)
+            colnames(yx) <- yx.names
+            rownames(yx) <- rownames.new
         } else {
             yx <- NULL
             yx.names <- NULL
@@ -398,7 +675,9 @@ or a factor with two levels\n\n")
             ax.names[1] <- a.names
             ax.names[-1] <- paste(a.names, x.names[-1], sep = ":")
             ax <- x * as.vector(a)
-            dimnames(ax) <- list(rownames(ax), ax.names)
+            colnames(ax) <- ax.names
+            rownames(ax) <- rownames.new
+
         } else {
             ax <- NULL
             ax.names <- NULL
@@ -411,6 +690,8 @@ or a factor with two levels\n\n")
                 if (length(attr(oterms, "term.labels"))>0 & attr(oterms,"intercept")) {
                     v <- v[, -1, drop = F]
                     v.names = colnames(v)
+                    rownames(v) <- rownames.new
+
                 } else {
                     v <- NULL
                     v.names <- NULL
@@ -421,7 +702,7 @@ or a factor with two levels\n\n")
                 if (length(attr(eterms, "term.labels"))>0 & attr(eterms,"intercept")) {
                     z <- z[, -1, drop = F]
                     z.names = colnames(z)
-
+                    rownames(z) <- rownames.new
                 } else {
                     z <- NULL
                     z.names <- NULL
@@ -430,8 +711,39 @@ or a factor with two levels\n\n")
 
 
         }
+        
+        ## new.order = new.order,
+        ## complete.rows = complete.rows, 
+        ## complete.rows.new = complete.rows.new,
 
-        drgee.data <- list(orig.order = order(rows.to.use),
+        ## if ( is.data.frame(data) | is.matrix(data) ) {
+        ##     rownames.orig <- rownames(data)
+        ## } else {
+        ##     rownames.orig <- NULL
+        ## }
+
+        ## if (!is.na(rownames.orig)) {
+        ##     rownames.new <- rownames.orig[idx]
+        ##     rownames(y) <- rownames.new
+        ##     rownames(a) <- rownames.new
+        ##     rownames(x) <- rownames.new
+        ##     rownames(ax) <- rownames.new
+        ##     rownames(yx) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        ##     rownames(y) <- rownames.new
+        drgee.data <- list(used.rows = idx,
+                           orig.order = order(idx),
+                           n.obs = n.obs, 
                            y = y,
                            a = a,
                            x = x,
@@ -440,7 +752,8 @@ or a factor with two levels\n\n")
                            z = z,
                            yx = yx,
                            id = id,
-                           clustname = clustname,
+                           rownames.orig = rownames.orig, 
+                           id.vcov = id.vcov, 
                            y.names = y.names, 
                            a.names = a.names, 
                            x.names = x.names, 
@@ -448,6 +761,8 @@ or a factor with two levels\n\n")
                            v.names = v.names, 
                            z.names = z.names, 
                            yx.names = yx.names, 
+                           clustname = clustname,
+                           clustname.vcov = clustname.vcov,
                            olink = olink,
                            elink = elink,
                            cond = cond, 
@@ -457,6 +772,7 @@ or a factor with two levels\n\n")
         class(drgee.data) <- "drgeeData"
         return(drgee.data)
     }
+
 
 summary.drgeeData <-
     function(object, ...) {

@@ -1,3 +1,40 @@
+Changes in version 1.1.8 (2019-05-13)
+
+o Fixed a bug regarding the ordering of observations
+  in the data returned from gee and drgee
+  
+Changes in version 1.1.7 (2019-04-09)
+
+o Updated the contact information for Johan Zetterqvist.
+
+o The functions drgee and gee now
+  returns U - the residuals from
+  the estimating equations evaluated
+  at the estimated values of the
+  parameters.
+  
+  They also return the matrix
+  d.U.sum - the sum of the derivatives
+  of the estimating equations
+  evaluated at the estimated values of
+  the parameters.
+
+o A function robustVcov takes U, d.U.sum
+  and an optional clustervariable as
+  arguments and returns the asymptotic
+  variance matrix.
+  
+o It is now possible to use a subset
+  argument in the functions drgee
+  and gee 
+
+o For conditional gee, it is now
+  possible to adjust for another
+  clustervariable than the one
+  used in the analysis (assuming)
+  that the old clustervariable
+  is contained within the new
+  
 Changes in version 1.1.6 (2016-11-07)
 
 o Added a helper function to obtain

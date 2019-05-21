@@ -1,18 +1,19 @@
 import("survival")
 import("data.table")
-importFrom("stats", "coef", "cov", "vcov", "formula", "gaussian", "model.frame", "na.pass", "pnorm", "quasibinomial", "quasipoisson", "glm.fit", "model.matrix", "terms", "printCoefmat")
+importFrom("stats", "coef", "cov", "vcov", "formula", "gaussian", "model.frame", "na.pass", "pnorm", "quasibinomial", "quasipoisson", "glm.fit", "model.matrix", "terms", "printCoefmat", "reformulate")
 importFrom("nleqslv", "nleqslv")
-importFrom("Rcpp", "sourceCpp")
-
+importFrom("Rcpp", "sourceCpp", "evalCpp")
 export(drgee, coef.drgee, vcov.drgee,
        print.drgee, summary.drgee,
        print.summary.drgee,
        gee, coef.gee, vcov.gee,
        print.gee, summary.gee,
-       print.summary.gee,
+       print.summary.gee,    
        findRoots, robVcov,
+       robustVcov, 
        drgeeData, summary.drgeeData, print.summary.drgeeData,
-       getScoreResidualsFromClogit
+       getScoreResidualsFromClogit,
+       centerX
        )
 
 S3method(coef, drgee)
@@ -30,5 +31,7 @@ S3method(print, summary.gee)
 S3method(summary, drgeeData)
 S3method(print, summary.drgeeData)
 
-useDynLib(drgee)
+## useDynLib(drgee, .registration = TRUE)
+## useDynLib(drgee, conditRes, center, .registration = TRUE)
+useDynLib(drgee, conditRes, center, .registration = TRUE, .fixes = "CPP_")
 

@@ -140,10 +140,10 @@ dreFit <-
 
             d.U3 <- cbind(d.U3.beta, d.U3.beta2, d.U3.alpha, d.U3.beta1, d.U3.gamma)
                 
-            d.U <- rbind( cbind(d.U1.beta, d.U1.beta2, d.U1.alpha, d.U1.beta1, d.U1.gamma),
+            d.U.sum <- rbind( cbind(d.U1.beta, d.U1.beta2, d.U1.alpha, d.U1.beta1, d.U1.gamma),
                          cbind(d.U2.beta, d.U2.beta2, d.U2.alpha, d.U2.beta1, d.U2.gamma),
                          cbind(d.U3.beta, d.U3.beta2, d.U3.alpha, d.U3.beta1, d.U3.gamma)
-                         ) / nrow(U)
+                         )
 
             coefficients <- c(beta.hat, beta2.hat, alpha.hat, beta1.hat, gamma.hat)
             coef.names <- c(object$ax.names, object$ax.names, object$z.names, object$ax.names, object$v.names)
@@ -242,7 +242,7 @@ dreFit <-
 
                 d.U1.beta1 <- matrix(rep(0, ncol(object$x) * ncol(object$ax)),
                                      nrow = ncol(object$x))
-                d.U1.gamma <- crossprod(object$x * e.fit$res, d.res.y.gamma) / nrow(U)
+                d.U1.gamma <- crossprod(object$x * e.fit$res, d.res.y.gamma)
 
                 d.U2.beta1.gamma <-
                     matrix(rep(0, ncol(object$z) * (ncol(object$ax) +
@@ -251,11 +251,11 @@ dreFit <-
                 d.U3.beta.alpha <-
                     matrix(rep(0, (ncol(object$ax) + ncol(object$v)) *
                                (ncol(object$ax) + ncol(object$z) ) ), ncol = ncol(object$ax) + ncol(object$z))
-                d.U3.beta1.gamma <- crossprod(o.fit$eq.x, o.fit$d.res) / nrow(U)
+                d.U3.beta1.gamma <- crossprod(o.fit$eq.x, o.fit$d.res)
 
-                d.U <- rbind( cbind(d.U1.beta, d.U1.alpha, d.U1.beta1, d.U1.gamma),
+                d.U.sum <- rbind( cbind(d.U1.beta, d.U1.alpha, d.U1.beta1, d.U1.gamma),
                              cbind(d.U2.beta, d.U2.alpha, d.U2.beta1.gamma),
-                             cbind(d.U3.beta.alpha, d.U3.beta1.gamma)) / nrow(U)
+                             cbind(d.U3.beta.alpha, d.U3.beta1.gamma))
 
                 coefficients <- c(beta.hat, alpha.hat, beta1.hat, gamma.hat)
                 coef.names <- c(object$ax.names, object$z.names, object$ax.names, object$v.names)
@@ -264,8 +264,8 @@ dreFit <-
                 
                 U <- cbind(U1, U2)
 
-                d.U <- rbind( cbind(d.U1.beta, d.U1.alpha),
-                             cbind(d.U2.beta, d.U2.alpha) ) / nrow(U)
+                d.U.sum <- rbind( cbind(d.U1.beta, d.U1.alpha),
+                             cbind(d.U2.beta, d.U2.alpha) )
 
                 coefficients <- c(beta.hat, alpha.hat)
                 coef.names <- c(object$ax.names, object$z.names)
@@ -276,18 +276,16 @@ dreFit <-
 
         names(coefficients) <- coef.names
         
-        ## Calculate the asymptotic variance of all estimates
-        
-        vcov <- robVcov(U, d.U, object$id)
-
-        dimnames(vcov) <- list(coef.names, coef.names)
-
         result <- list(coefficients = coefficients,
-                       vcov = vcov,
+                       coef.names = coef.names, 
+                       U = U,
+                       d.U.sum = d.U.sum,
                        optim.object = optim.object,
                        optim.object.o = NULL,
-                       optim.object.e = NULL)
-
+                       optim.object.e = NULL,
+                       id = object$id,
+                       id.vcov = object$id.vcov)
+        
         return(result)
-
+        
     }

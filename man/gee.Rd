@@ -6,6 +6,8 @@
 \alias{print.gee}
 \alias{summary.gee}
 \alias{print.summary.gee}
+\alias{naiveVcov.gee}
+\alias{clusterRobustVcov.gee}
 \title{Generalized Estimating Equations}
 \description{
   \code{gee} performs estimation of parameters in a restricted mean
@@ -15,8 +17,8 @@
   intercepts are assumed.
 }
 \usage{
-gee(formula, link = c("identity", "log", "logit"), data, cond = FALSE,
-clusterid, rootFinder = findRoots, ...)
+gee(formula, link = c("identity", "log", "logit"), data, subset, cond = FALSE,
+clusterid, clusterid.vcov, rootFinder = findRoots, ...)
 }
 
 \arguments{
@@ -36,6 +38,10 @@ clusterid, rootFinder = findRoots, ...)
    in the environment of the \code{formula} argument.
  }
 
+  \item{subset}{
+    An optional vector defining a subset of the data to be used.
+  }
+
 \item{cond}{
   A logical value indicating whether cluster-specific intercepts should
   be assumed. Requires a \code{clusterid} argument.
@@ -47,6 +53,16 @@ clusterid, rootFinder = findRoots, ...)
   found in the \code{data} argument, it will be searched for in the
   calling frame. If missing, each observation will be considered to be
   a separate cluster. This argument is required when \code{cond = TRUE}.
+  }
+
+  \item{clusterid.vcov}{
+    A cluster-defining variable or a character string naming a
+    cluster-defining variable in the \code{data} argument to be used for
+    adding contributions from the same cluster. These clusters can be
+    different from the clusters defined by \code{clusterid}. However,
+    each cluster defined by \code{clusterid} needs to be contained in
+    exactly one cluster defined by \code{clusterid.vcov}. This variable
+    is useful when the clusters are hierarchical.
   }
 
 \item{rootFinder}{

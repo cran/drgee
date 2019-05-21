@@ -170,9 +170,9 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
 
         d.U3.beta1.gamma <- crossprod( cbind(ax.cent, v.cent), o.fit$d.res )
 
-        d.U <- rbind(cbind(d.U1.beta, d.U1.alpha, d.U1.beta1, d.U1.gamma),
-                     cbind(d.U2.beta, d.U2.alpha, d.U2.beta1.gamma),
-                     cbind(d.U3.beta.alpha, d.U3.beta1.gamma) ) / nrow(U)
+        d.U.sum <- rbind(cbind(d.U1.beta, d.U1.alpha, d.U1.beta1, d.U1.gamma),
+                         cbind(d.U2.beta, d.U2.alpha, d.U2.beta1.gamma),
+                         cbind(d.U3.beta.alpha, d.U3.beta1.gamma) )
 
         coefficients <- c(beta.hat, alpha.hat, beta1.hat, gamma.hat)
         coef.names <- c(object$ax.names, object$z.names, object$ax.names, object$v.names)
@@ -181,8 +181,8 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
 
         U <- cbind(U1, U2)
 
-        d.U <- rbind(cbind(d.U1.beta, d.U1.alpha),
-                     cbind(d.U2.beta, d.U2.alpha)) / nrow(U)
+        d.U.sum <- rbind(cbind(d.U1.beta, d.U1.alpha),
+                         cbind(d.U2.beta, d.U2.alpha))
 
         coefficients <- c(beta.hat, alpha.hat)
         coef.names <- c(object$ax.names, object$z.names)
@@ -190,15 +190,14 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
 
     names(coefficients) <- coef.names
     
-    ## Calculate variance of all estimates
-
-    vcov <- robVcov(U, d.U, object$id)
-
-    dimnames(vcov) <- list(coef.names, coef.names)
-
-    result <- list(coefficients = coefficients, vcov = vcov,
-                   optim.object = optim.object)
-
+    result <- list(coefficients = coefficients,
+                   coef.names = coef.names, 
+                   U = U,
+                   d.U.sum = d.U.sum,
+                   optim.object = optim.object,
+                   id = object$id,
+                   id.vcov = object$id.vcov)
+    
     return(result)
 
 }

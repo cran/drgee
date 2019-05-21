@@ -56,6 +56,10 @@ getScoreResidualsFromClogit(fit, coefs, y, x, id)
     An \eqn{p} x \eqn{p} matrix containing the sums of the
     derivatives. The rows correspond to the estimating equations and
     the columns correspond to the partial derivatives.}
+  
+  \item{dU.mean}{The mean cluster sum of the derivatives of the score
+    residuals from the conditional likelihood. 
+  }
 
 }
 
@@ -67,4 +71,4 @@ Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
   \code{\link{robVcov}}.
 }
 
-\keyword{optimize}
+\keyword{cluster}
