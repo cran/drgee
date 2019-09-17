@@ -6,7 +6,7 @@
 \alias{print.drgee}
 \alias{summary.drgee}
 \alias{print.summary.drgee}
-\alias{naiveVcov.drgee}
+%\alias{naiveVcov.drgee}
 \alias{clusterRobustVcov.drgee}
 \title{Doubly Robust Generalized Estimating Equations}
 \description{
@@ -227,6 +227,10 @@ drgee(outcome, exposure,
   estimation of the outcome nuisance parameters.}
   \item{call }{The matched call.}
   \item{estimation.method }{The value of the input argument \code{estimation.method}.}
+  \item{data}{The original data object, if given as an input argument}
+  \item{oformula}{The original oformula object, if given as an input argument}
+  \item{eformula}{The original eformula object, if given as an input argument}
+  \item{iaformula}{The original iaformula object, if given as an input argument}
 
   The class methods \code{coef} and \code{vcov} can be used to extract
   the estimated parameters and their covariance matrix from a

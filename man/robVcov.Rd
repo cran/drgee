@@ -2,6 +2,7 @@
 \name{robVcov}
 \alias{robVcov}
 \alias{robustVcov}
+\alias{naiveVcov}
 \title{
 Robust Variance Calculation
 }

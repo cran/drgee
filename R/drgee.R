@@ -57,6 +57,16 @@ drgee <-
 
         drgee.data <- eval(dD, parent.frame())
 
+        n.obs <- drgee.data$n.obs
+
+        if (drgee.data$n.obs == 0) {
+            stop("\nNo data\n")
+        }
+        
+        if (length(drgee.data$used.rows) == 0) {
+            stop("\nNo data can be used for estimation\n")
+        }
+        
         if (estimation.method == "o") {
             fit <- oFit(drgee.data)
         } else if (estimation.method == "e") {
@@ -66,15 +76,7 @@ drgee <-
         }
 
         ## Calculate variance based on the estimating equations
-        if( !is.null(fit$id.vcov) ){
-            
-            vcov <- as.matrix( robustVcov(fit$U, fit$d.U.sum, fit$id.vcov) )
-
-        } else {
-            
-            vcov <- as.matrix( robustVcov(fit$U, fit$d.U.sum, fit$id) )
-
-        }
+        vcov <- as.matrix( robustVcov(fit$U, fit$d.U.sum, drgee.data$id.vcov) )
 
         dimnames(vcov) <- list( fit$coef.names, fit$coef.names)
         
@@ -90,6 +92,22 @@ drgee <-
 
         fit$estimation.method <- estimation.method
 
+        if (!missing(eformula)) {
+            fit$eformula <- eformula
+        }
+
+        if (!missing(oformula)) {
+            fit$oformula <- oformula
+        }
+
+        if (!missing(iaformula)) {
+            fit$iaformula <- iaformula
+        }
+
+        if (!missing(data) ) {
+            fit$data <- data
+        }
+        
         class(fit) <- c("drgee")
 
         return(fit)
@@ -184,12 +202,12 @@ vcov.drgee <- function(object, ...) {
 
 }
 
-naiveVcov.drgee <- function(object) {
+## naiveVcov.drgee <- function(object) {
     
-    d.U <- object$d.U.sum / object$drgee.data$n.obs
-    return( -solve( d.U ) )
+##     d.U <- object$d.U.sum / object$drgee.data$n.obs
+##     return( -solve( d.U ) )
     
-}
+## }
 
 clusterRobustVcov.drgee <- function(object, clusterid = NULL){
 

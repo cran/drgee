@@ -25,24 +25,32 @@ gee <-
 
         gee.data <- eval(dD, parent.frame())
 
-        naive.var <- NULL
+        n.obs <- gee.data$n.obs
+
+        if (gee.data$n.obs == 0) {
+            stop("\nNo data\n")
+        }
+        
+        if (length(gee.data$used.rows) == 0) {
+            stop("\nNo data can be used for estimation\n")
+        }
+        
+        n.vars <- ncol(gee.data$v)
+
+        if (n.vars == 0) {
+            stop("\nNo parameters to estimate\n")
+        }
         
         if (cond) {
             
-            if (is.null(gee.data$v)) {
-                
-                stop("No parameters to estimate\n\n")
-                
-            } else {
-                
-                fit <- geeFitCond(gee.data$y,
-                                  gee.data$v,
-                                  gee.data$y.names,
-                                  gee.data$v.names, 
-                                  link = link,
-                                  gee.data$id,
-                                  rootFinder, ...)
-                }
+            fit <- geeFitCond(gee.data$y,
+                              gee.data$v,
+                              gee.data$y.names,
+                              gee.data$v.names, 
+                              link = link,
+                              gee.data$id,
+                              rootFinder,
+                              ...)
             
         } else {
         
@@ -55,21 +63,10 @@ gee <-
         coefficients = fit$coefficients
         names(coefficients) <- gee.data$v.names
 
-        n.obs <- gee.data$n.obs
-        n.vars <- ncol(gee.data$v)
-        used.rows <- gee.data$used.rows
-
-        ## x <- matrix(NA, n.obs, n.vars)
-        ## x[used.rows, ] <- gee.data$v
-        ## rownames(x) <- gee.data$rownames.orig
         x <- gee.data$v[gee.data$orig.order,, drop = F]
 
         obs.names <- rownames(x)
         
-        ## y <- rep(NA, n.obs)
-        ## ## y[used.rows] <- as.vector(gee.data$y)[gee.data$orig.order]
-        ## y[used.rows] <- as.vector(gee.data$y)
-        ## ## names(y) <- gee.data$y.names
         y <- as.vector(gee.data$y[gee.data$orig.order])
         names(y) <- obs.names
 
@@ -77,51 +74,12 @@ gee <-
         names(res) <- obs.names
 
         d.res <- fit$d.res[gee.data$orig.order,, drop = F]
-        ## x <- matrix( rep(NA, n.vars * gee.data$n.obs), ncol = n.vars )
-        ## x[gee.data$used.rows, ] <- gee.data$v
-        ## colnames(x) <- gee.data$v.names
-        ## rownames(x) <- 1:n.obs
-        ## Calculate asymptotic variance
         
+        ## Calculate asymptotic variance        
         U <- fit$eq.x * fit$res
-
-        ## d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
-
         d.U.sum <- crossprod( fit$eq.x , fit$d.res )
-
-        if( !is.null(gee.data$id.vcov) ){
-            
-            vcov <- as.matrix( robustVcov(U, d.U.sum, gee.data$id.vcov) )
-
-        } else {
-            
-            vcov <- as.matrix( robustVcov(U, d.U.sum, gee.data$id) )
-
-        }
-
+        vcov <- as.matrix( robustVcov(U, d.U.sum, gee.data$id.vcov) )
         dimnames(vcov) <- list(gee.data$v.names, gee.data$v.names)
-
-        ## result <- list(coefficients = coefficients,
-        ##                vcov = vcov,
-        ##                call = call,
-        ##                cond = cond,
-        ##                y = y,
-        ##                x = x,
-        ##                gee.data = gee.data, 
-        ##                optim.object = fit$optim.object,
-        ##                res = fit$res[gee.data$orig.order],
-        ##                d.res = fit$d.res[gee.data$orig.order,, drop = FALSE],
-        ##                naive.var = naive.var)
-
-        ## res <- rep(NA, n.obs)
-        ## res[used.rows] <- fit$res
-        
-        ## d.res <- matrix(NA, n.obs, n.vars)
-        ## d.res[used.rows, ] <- fit$d.res
-        ## d.res <- fit$res[gee.data$orig.order,, drop = F]
-
-        ## res <- as.vector(fit$res[gee.data$orig.order])
-        ## d.res <- fit$res[gee.data$orig.order,, drop = F]
 
         result <- list(coefficients = coefficients,
                        vcov = vcov,
@@ -135,16 +93,12 @@ gee <-
                        d.U.sum = d.U.sum,
                        res = res, 
                        d.res = d.res, 
-                       ## res = fit$res,
-                       ## d.res = fit$d.res,
-                       naive.var = naive.var)
+                       formula = formula)
 
-        ## if( cond & link == "logit") {
-            
-        ##     result$clusters.info <- fit$clusters.info
-            
-        ## }
-
+        if (!missing(data) ) {
+            result$data <- data
+        }
+        
         class(result) <- "gee"
 
         return(result)
@@ -232,8 +186,10 @@ vcov.gee <- function(object, ...) {
 
 naiveVcov.gee <- function(object) {
     
-    d.U <- object$d.U.sum / object$gee.data$n.obs
-    return( -solve( d.U ) )
+    ## d.U <- object$d.U.sum / object$gee.data$n.obs
+    ## return( -solve( d.U ) )
+
+    return( -solve( object$d.U.sum ) )
     
 }
 

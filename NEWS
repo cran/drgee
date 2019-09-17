@@ -1,3 +1,14 @@
+Changes in version 1.1.9 (2019-09-09)
+
+o Fixed a bug that caused R to crash when the
+  clustering variable was a factor.
+  
+o The object returned from gee now contains the
+  original formula object and the original dataset
+
+o The object returned from drgee now contains the
+  original formula objects and the original dataset
+
 Changes in version 1.1.8 (2019-05-13)
 
 o Fixed a bug regarding the ordering of observations

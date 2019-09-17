@@ -394,6 +394,7 @@ or a factor with two levels\n\n")
                 ## id.orig <- id.orig[subset]
             ## }
             complete.rows <- complete.rows & !is.na(id.orig)
+            ## If the clusterid is missing
         } else {
             if (cond) {
                 stop("For conditional methods, clusterid is required\n\n")
@@ -403,22 +404,25 @@ or a factor with two levels\n\n")
             }
         }
 
-        ## Get the clusterid if it is given and create a clusterid otherwise
+        ## Check if the clusterid.vcov is given
         if ( !missing(clusterid.vcov) ) {
+            ## Check if clusterid.vcov is NULL
             if ( is.null(clusterid.vcov ) ) {
-                id.vcov <- NULL
-                clustname.vcov <- NULL
+                id.vcov.orig <- id.orig 
+                clustname.vcov <- clustname
+            ## Check if clusterid.vcov is a character string
             } else if ( is.character(clusterid.vcov) ) {
                 clustname.vcov <- clusterid.vcov
                 if (is.environment(data)) {
-                    id.vcov <- get(clustname.vcov, envir = data)
+                    id.vcov.orig <- get(clustname.vcov, envir = data)
                 } else if (is.data.frame(data)) {
-                    id.vcov <- data[clustname.vcov]
+                    id.vcov.orig <- data[clustname.vcov]
                 } else if (is.matrix(data)) {
-                    id.vcov <- data[, clustname.vcov]
+                    id.vcov.orig <- data[, clustname.vcov]
                 } else {
                     stop(paste("The clusterid ", clustname.vcov, " could not be found\n\n"))
                 }
+                ## Otherwise assume clusterid.vcov is a vector
             } else {
                 clustarg.vcov <- call[["clusterid.vcov"]]
                 if( is.character(clustarg.vcov) ) {
@@ -428,28 +432,29 @@ or a factor with two levels\n\n")
                     clustname.vcov <- clustname.vcov.tmp[length(clustname.vcov.tmp)]
                 }
                 
-                id.vcov <- as.vector(clusterid.vcov)
+                id.vcov.orig <- as.vector(clusterid.vcov)
             }
-
-            if (is.list(id.vcov)) {
-                id.vcov <- unlist(id.vcov)
-            } else {
-                id.vcov <- as.vector(id.vcov)
-            }
-
-            ## if ( !is.null(subset)) {
-            ##     id.vcov <- id.vcov[subset]
-            ## }
             
-            complete.rows <- complete.rows & !is.na(id.vcov)
+            if (is.list(id.vcov.orig)) {
+                id.vcov.orig <- unlist(id.vcov.orig)
+            } else {
+                id.vcov.orig <- as.vector(id.vcov.orig)
+            }
+            
+            complete.rows <- complete.rows & !is.na(id.vcov.orig)
 
+            ## If clusterid.vcov is missing
+            ## use the clusterid
         } else {
             
-            id.vcov <- NULL
+            id.vcov.orig <- NULL
             clustname.vcov <- NULL
+
+            ## id.vcov <- NULL
+            ## clustname.vcov <- NULL
             
         }
-
+        
         ## browser()
 
         ## #######################################################
@@ -471,7 +476,8 @@ or a factor with two levels\n\n")
         if ( cond ) {
             use.id <- id.orig[which(use.rows)]
             id.counts <- table(use.id)
-            id.keep <- as.numeric(names(id.counts)[which(id.counts > 1)])
+            ## id.keep <- as.numeric(names(id.counts)[which(id.counts > 1)])
+            id.keep <- names(id.counts)[which(id.counts > 1)]
             id.rows <- id.orig %in% id.keep
             use.rows <- use.rows & id.rows
         }
@@ -602,13 +608,15 @@ or a factor with two levels\n\n")
             rownames.new <- NULL
         }
 
-        if( !is.null(id.vcov) ) {            
-            id.vcov <- as.factor(id.vcov[idx])
-            names(id.vcov) <- rownames.new
-        }
-
         names(id) <- rownames.new
 
+        if( !is.null(id.vcov.orig) ) {            
+            id.vcov <- as.factor(id.vcov.orig[idx])
+            names(id.vcov) <- rownames.new
+        } else {
+            id.vcov <- id
+        }
+        
         y <- y[idx,, drop = F]
         y.names <- colnames(y)
         rownames(y) <- rownames.new
@@ -741,7 +749,8 @@ or a factor with two levels\n\n")
         ##     rownames(y) <- rownames.new
         ##     rownames(y) <- rownames.new
         ##     rownames(y) <- rownames.new
-        drgee.data <- list(used.rows = idx,
+        drgee.data <- list(## orig.data = data,
+                           used.rows = idx,
                            orig.order = order(idx),
                            n.obs = n.obs, 
                            y = y,
@@ -751,9 +760,9 @@ or a factor with two levels\n\n")
                            v = v,
                            z = z,
                            yx = yx,
-                           id = id,
+                           id = factor(id),
                            rownames.orig = rownames.orig, 
-                           id.vcov = id.vcov, 
+                           id.vcov = factor(id.vcov), 
                            y.names = y.names, 
                            a.names = a.names, 
                            x.names = x.names, 

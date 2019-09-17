@@ -98,12 +98,18 @@ clusterid, clusterid.vcov, rootFinder = findRoots, ...)
   \item{optim.object }{An estimation object returned from the function specified
     in the \code{rootFinder}, if this function is called.}
   \item{res }{The residuals from the estimating equations.}
-  \item{d.res }{The derivative of the residuals from the estimating equations.}
+  \item{d.res }{The derivative of the residuals from the estimating
+    equations.}
+  \item{data}{The original data object, if given as an input argument}
+  \item{formula}{The original formula object, if given as an input argument}
   
   The class methods \code{coef} and \code{vcov} can be used to extract
   the estimated parameters and their covariance matrix from a
-  \code{gee} object. \code{summary.drgee} produces a summary of the
-  calculations.
+  \code{gee} object. To obtain the 'naive' variance, i.e. the variance
+  obtained from maximum likelihood estimation assuming correct
+  parameteric model and no clustering, use the class method
+  \code{naiveVcov}. The class method \code{summary.drgee} produces a
+  summary of the calculations.
 }
 \seealso{
   \code{glm}
