@@ -1,3 +1,16 @@
+Changes in version 1.1.10 (2020-01-08)
+
+o Fixed compatibility with R version 4,
+  by exchanging uses of the function class
+  with the function inherits in conjunction
+  with try. Also repleced class by inherits
+  when checking the class of objects.
+  
+o Changed Depends to Imports. This means that
+  the packages nleqslv, survival, Rcpp and
+  data.table are no longer automatically
+  loaded when drgee is loaded.
+  
 Changes in version 1.1.9 (2019-09-09)
 
 o Fixed a bug that caused R to crash when the

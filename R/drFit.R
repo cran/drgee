@@ -1,7 +1,7 @@
 drFit <-
     function(object, rootFinder = findRoots, intercept, ...){
 
-	if (class(object)!="drgeeData") {
+	if (!inherits(object, "drgeeData")) {
             stop("An object of class \"drgeeData\" is expected")
 	}
         

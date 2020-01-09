@@ -25,15 +25,6 @@ getScoreResidualsFromClogit <-
     clusters.info <- getDiscordantClustersInfo(y, id)
     disc.clusters <- with(clusters.info, clusters.info[which(disc), ])
 
-    ## resids <- .Call("conditRes",
-    ##                 coefs, 
-    ##                 disc.clusters$ysum, 
-    ##                 disc.clusters$clust.size, 
-    ##                 disc.clusters$min.idx,
-    ##                 disc.clusters$inv,
-    ##                 as.vector(y),
-    ##                 x,
-    ##                 PACKAGE = "drgee")
     resids <- .Call(conditRes,
                     coefs, 
                     disc.clusters$ysum, 

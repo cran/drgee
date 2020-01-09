@@ -19,7 +19,7 @@ geeFit <-
                             y = y,
                             family = family) )
 
-	if (class(fit) == 'try-error') {
+        if (inherits(fit, "try-error")) { 
 
             d.res = matrix(rep(NA,nrow(x) * ncol(x)), nrow = nrow(x))
 
@@ -27,8 +27,7 @@ geeFit <-
                          res = rep(NA,nrow(y)),
                          d.res = d.res,
                          eq.x = eq.x,
-                         optim.object = NULL))## ,
-                         ## naive.var = NULL) )
+                         optim.object = NULL))
 
         } else {
 
@@ -40,8 +39,7 @@ geeFit <-
                         res = as.vector(y - fit$fitted.values),
                         d.res = d.res,
                         eq.x = x,
-                        optim.object = NULL))## ,
-                        ## naive.var = NULL))
+                        optim.object = NULL))
         }
 
     }

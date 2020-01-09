@@ -186,9 +186,6 @@ vcov.gee <- function(object, ...) {
 
 naiveVcov.gee <- function(object) {
     
-    ## d.U <- object$d.U.sum / object$gee.data$n.obs
-    ## return( -solve( d.U ) )
-
     return( -solve( object$d.U.sum ) )
     
 }

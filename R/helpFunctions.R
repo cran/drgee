@@ -5,10 +5,7 @@
 ## identification variable id
 centerX <- function(x, id)
 {
-
-    ## return( .Call("center", x, id, PACKAGE = "drgee") )
     return( .Call(center, x, id) )
-
 }
 
 ## Just a wrapper of nleqslv in the R package nleqslv

@@ -52,17 +52,6 @@ dreFit <-
             exp.gamma.v <- as.vector(exp( object$v %*% gamma.hat ))
             exp.alpha.z <- as.vector(exp( object$z %*% alpha.hat ))
 
-            ## all.args <- c(list(beta.init = beta1.hat,
-            ##                    eq.func = dr.logit.eq.func,
-            ##                    d.eq.func = d.dr.logit.eq.func,
-            ##                    arg.list = list(y.f = object$y,
-            ##                                    ax.f = object$ax,
-            ##                                    a.f = object$a,
-            ##                                    x.f = object$x,
-            ##                                    exp.gamma.v = exp.gamma.v,
-            ##                                    exp.alpha.z = exp.alpha.z)),
-            ##               list(...))
-
             all.args <- c(list(beta.init = beta1.hat,
                                eq.func = dr.logit.eq.func,
                                d.eq.func = NULL,

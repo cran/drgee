@@ -277,7 +277,7 @@ drConditFit <- function(object, rootFinder = findRoots, intercept = TRUE) {
     ## and eq.func as estimation function
     root.object <- try( do.call(rootFinder, all.args) )
     
-    if (class(root.object) == 'try-error') {
+    if (inherits(root.object, "try-error")) {
 
         coefficients <- c( rep(NA, n.beta.params),
                           beta2.hat,
@@ -371,25 +371,3 @@ drConditFit <- function(object, rootFinder = findRoots, intercept = TRUE) {
     return(result)
         
 }
-    
-##     ## Clumsy workaround to get through the CRAN check
-##     idx <- NULL
-##     id <- NULL
-##     size <- NULL
-##     y <- NULL
-##     a <- NULL
-##     y.sum <- NULL
-##     a.sum <- NULL
-##     y.disc <- NULL
-##     a.disc <- NULL
-##     ya.disc <- NULL
-    
-##     ya.dt <- data.table(idx = seq_len(n.obs),
-##                         id = object$id,
-##                         y = as.integer(object$y),
-##                         a = as.integer(object$a) )
-    
-##     names(ya.dt) <- c("idx", "id", "y", "a")
-
-##     setkey(ya.dt, "id")
-    

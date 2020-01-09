@@ -40,9 +40,7 @@ robustVcov <-
         
         inv.d.U <- try( solve(d.U) )
  
-        ## vcov <- inv.d.U %*% cov(U, U) %*% t(inv.d.U) / n.clust
- 
-        if (class(inv.d.U) == 'try-error') { 
+        if (inherits(inv.d.U, "try-error")) { 
  
             vcov <- matrix(rep( NA, n.par^2 ), ncol = n.par ) 
  
@@ -72,7 +70,7 @@ robVcov <-
 
         inv.d.U <- try(solve(d.U))
 
-        if (class(inv.d.U) == 'try-error') {
+        if (inherits(inv.d.U, "try-error")) { 
 
             vcov <- matrix(rep( NA, n.par^2 ), ncol = n.par )
 

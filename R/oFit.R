@@ -1,7 +1,7 @@
 oFit <-
     function(object, inv = FALSE, ...) {
 
-        if(class(object) != "drgeeData") {
+	if (!inherits(object, "drgeeData")) {
             stop("An object of class \"drgeeData\" is expected")
         }
 
@@ -51,17 +51,11 @@ oFit <-
 
         }
 
-        ## U <- apply(fit$eq.x, 2, '*', fit$res)
-        ## d.U <- crossprod( fit$eq.x , fit$d.res ) / nrow(U)
-
         U <- fit$eq.x * fit$res
         d.U.sum <- crossprod( fit$eq.x , fit$d.res ) 
 
         coefficients <- fit$coefficients
         names(coefficients) <- coef.names
-
-        ## vcov <- robVcov(U, d.U, object$id)
-        ## dimnames(vcov) <- list(coef.names, coef.names)
 
         result <- list(coefficients = coefficients,
                        coef.names = coef.names, 

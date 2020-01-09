@@ -13,8 +13,6 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
 
     if (omodel) {
 
-        ## ## Center variables
-        ## v.cent <- object$v - apply(object$v,2,function(z) ave(z,object$id))
         ## Fit outcome nuisance model
         o.fit <- geeFitCond(y = object$y,
                             x = cbind(object$ax,object$v),
@@ -22,9 +20,7 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
                             id = object$id,
                             rootFinder = rootFinder, ...)
         beta1.hat <- o.fit$coefficients[1:ncol(object$ax)]
-        ## names(beta1.hat) <- colnames(object$ax)
         gamma.hat <- o.fit$coefficients[-(1:ncol(object$ax))]
-        ## names(gamma.hat) <- colnames(object$v)
 
         v.cent <- .Call("center", object$v, object$id, PACKAGE = "drgee")
 
@@ -35,14 +31,11 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
 
     if (object$olink == "identity") {
 
-        ## y.cent <- object$y - ave(object$y, object$id)
-        
         if (omodel) {
             y.star.cent <- y.cent -  v.cent %*% gamma.hat
         } else {
             y.star.cent <- y.cent
         }
-
 
         ## lhs %*% beta = rhs
         lhs <- crossprod( x.res.e, ax.cent)
@@ -108,14 +101,11 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
         ## and the columns are the partial derivatives
         s.o <- as.vector( y.star * exp(- object$ax %*% beta.hat) )
         s.o.cent <- .Call("center", as.matrix(s.o), object$id, PACKAGE = "drgee")
-        ## s.o.cent <- s.o - ave(s.o, object$id)
         x.s.o.cent <- apply(object$x, 2, '*', s.o.cent)
 
         U1 <- apply(x.res.e, 2, '*', s.o.cent)
 
         d.s.o.beta <- apply(-object$ax, 2, '*', s.o)
-        ## d.s.o.beta.cent <- d.s.o.beta - apply(d.s.o.beta, 2, function(z) ave(z,
-        ## object$id))
         d.s.o.beta.cent <- .Call("center", as.matrix(d.s.o.beta), object$id, PACKAGE = "drgee")
         d.U1.beta <- crossprod( x.res.e, d.s.o.beta.cent  )
 
@@ -127,8 +117,6 @@ dreFitCond <- function(object, omodel = TRUE, rootFinder = findRoots, ...){
             d.U1.beta1 <- matrix( rep(0, ncol(object$ax)^2), ncol = ncol(object$ax))
 
             d.s.o.gamma <- apply(-object$v, 2, '*', s.o)
-            ## d.s.o.gamma.cent <- d.s.o.gamma - apply(d.s.o.gamma, 2, function(z)
-            ## ave(z,object$id))
             d.s.o.gamma.cent <- .Call("center", as.matrix(d.s.o.gamma), object$id, PACKAGE = "drgee")
             d.U1.gamma <- crossprod( x.res.e, d.s.o.gamma.cent  )
         }

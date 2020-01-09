@@ -1,7 +1,7 @@
 eFit <-
     function(object, rootFinder = findRoots, ...){
 
-	if (class(object) != "drgeeData") {
+	if (!inherits(object, "drgeeData")) {
             stop("An object of class \"drgeeData\" is expected\n\n")
 	}
 
