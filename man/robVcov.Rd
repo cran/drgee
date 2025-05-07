@@ -3,9 +3,7 @@
 \alias{robVcov}
 \alias{robustVcov}
 \alias{naiveVcov}
-\title{
-Robust Variance Calculation
-}
+\title{Robust Variance Calculation}
 \description{
 \code{robVcov} and \code{robustVcov} calculates the asymptotic variance for Z-estimators.
 }
@@ -46,7 +44,7 @@ robVcov(U, d.U, id = NULL)
 	The estimated covariance matrix.
 }
 \author{
-  Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
+  Johan Zetterqvist, Arvid \enc{SjÃ¶lander}{Sjolander}
 }
 \references{
   van der Vaart, A.W. (2000), \emph{Asymptotic Statistics},

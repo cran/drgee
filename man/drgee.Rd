@@ -6,7 +6,6 @@
 \alias{print.drgee}
 \alias{summary.drgee}
 \alias{print.summary.drgee}
-%\alias{naiveVcov.drgee}
 \alias{clusterRobustVcov.drgee}
 \title{Doubly Robust Generalized Estimating Equations}
 \description{
@@ -25,7 +24,6 @@ drgee(outcome, exposure,
       cond = FALSE, clusterid, clusterid.vcov, rootFinder = findRoots,
       intercept = TRUE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{outcome}{
     The outcome as variable or as a character string naming a variable
@@ -130,11 +128,11 @@ drgee(outcome, exposure,
     \cdot X(L)}{A*X(L)} should be interpreted as a columnwise
   multiplication and that \eqn{X(L)} will always contain a column of 1's.
   Given a specification of an outcome nuisance model \eqn{g\{E(Y|A=0,L)=\gamma^T
-    V(L)}{g\{E(Y|A=0,L)=gamma^T V(L)} (where \eqn{V(L)} is a function of \eqn{L})
+    V(L)}{g\{E(Y|A=0,L)=gamma^T V(L)} (where \eqn{V(L)} is a function of \eqn{L}),
   O-estimation is performed. Alternatively, leaving \eqn{g\{E(Y|A=0,L)}
   unspecified and using an exposure nuisance model \eqn{h\{E(A|L)\}=\alpha^T
     Z(L)}{h\{E(Y|L)\}=alpha^T Z(L)} (where \eqn{h} is a link
-  function and \eqn{Z(L)} is a function of \eqn{L}) E-estimation
+  function and \eqn{Z(L)} is a function of \eqn{L}), E-estimation
   is performed.  When \eqn{g} is logit, the exposure nuisance
   model is required be of the form
   \eqn{logit\{E(A|Y=0,L)\}=\alpha^T Z(L)}{logit\{E(A|Y=0,L)\}=alpha^T Z(L)}.
@@ -153,8 +151,8 @@ drgee(outcome, exposure,
     A \cdot L_1}{logit\{E(Y|A,L_1,L_2)-logit\{E(Y|A=0,L_1,L_2)\}=beta_0 A + beta_1 A *
     L_1} where \eqn{L_1} and \eqn{L_2} are the covariates that we wish
   to adjust for. To adjust for  \eqn{L_1} and \eqn{L_2}, we can use an outcome
-  nuisance model \eqn{E(Y|A=0,L_1,L_2;\gamma_0, \gamma_1)=\gamma_0 + \gamma_1
-  L_1}{E(Y|A=0,L_1,L_2;gamma_0, gamma_1)=gamma_0 + gamma_1 L_1} or an
+  nuisance model \eqn{logit\{E(Y|A=0,L_1,L_2;\gamma_0, \gamma_1, \gamma_2)\}=\gamma_0 + \gamma_1
+  L_1 + \gamma_2 L_2}{E(Y|A=0,L_1,L_2;gamma_0, gamma_1, gamma_2)=gamma_0 + gamma_1 L_1 + gamma_2 L_2} or an
   exposure nuisance model \eqn{logit\{E(A|Y=0,L_1,L_2)\}=\alpha_0+\alpha_1
   L_1+\alpha_2 L_2}{logit\{E(A|Y=0,L_1,L_2)\}=alpha_0+alpha_1
   L_1+alpha_2 L_2} to calculate estimates of \eqn{\beta_0}{beta_0} and \eqn{\beta_1}{beta_1}
@@ -209,6 +207,7 @@ drgee(outcome, exposure,
   O-estimation can also be performed using the \code{gee} function.
 
 }
+
 \value{
   \code{drgee} returns an object of class \code{drgee} containing:
 
@@ -220,10 +219,10 @@ drgee(outcome, exposure,
   	in the \code{rootFinder}, if this function is called for the
   estimation of the main model parameters.}
   \item{optim.object.o }{An estimation object returned from the function specified
-  	in the \code{rootFinder}, if this function is called for the
+  	in the \code{rootFinder} argument, if this function is called for the
   estimation of the outcome nuisance parameters.}
   \item{optim.object.e }{An estimation object returned from the function specified
-  	in the \code{rootFinder}, if this function is called for the
+  	in the \code{rootFinder} argument, if this function is called for the
   estimation of the outcome nuisance parameters.}
   \item{call }{The matched call.}
   \item{estimation.method }{The value of the input argument \code{estimation.method}.}
@@ -238,12 +237,11 @@ drgee(outcome, exposure,
   calculations.
 }
 \seealso{
-  \code{\link{gee}} for O-estimation, \code{\link{findRoots}} for
-  nonlinear equation solving and \code{\link{robVcov}} for
+  \code{\link{gee}} for O-estimation and \code{\link{robVcov}} for
   estimation of variance.
 }
 \author{
-Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
+Johan Zetterqvist, Arvid \enc{Sjolander}{Sjolander}
 }
 
 \examples{
@@ -315,7 +313,7 @@ summary(e.est)
 \keyword{cluster}
 
 \references{
-  Orsini N., Belocco R., \enc{Sjölander}{Sjolander} A. (2013), Doubly
+  Orsini N., Belocco R., \enc{SjÃ¶lander}{Sjolander} A. (2013), Doubly
   Robust Estimation in Generalized Linear Models, \emph{Stata Journal},
   \bold{13}, 1, pp. 185--205
 
@@ -333,6 +331,6 @@ summary(e.est)
   \bold{97}, 1, 171--180
 
   Zetterqvist J., Vansteelandt S., Pawitan Y.,
-  \enc{Sjölander}{Sjolander} (2016), Doubly Robust Methods for Handling
+  \enc{Sjolander}{Sjolander} (2016), Doubly Robust Methods for Handling
   Confounding by Cluster, \emph{Biostatistics}, \bold{17}, 2, 264--276
 }

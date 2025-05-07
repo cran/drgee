@@ -1,12 +1,9 @@
 \encoding{latin1}
 \name{findRoots}
 \alias{findRoots}
-
-\title{
-Non Linear Equation System Solving
-}
+\title{Non Linear Equation System Solving}
 \description{
-	A wrapper around \code{nleqslv} from the \pkg{nleqslv} package
+	A wrapper around \code{nleqslv} from the \code{nleqslv} package
 	to solve a non linear system of equations.
 }
 \usage{
@@ -47,9 +44,6 @@ findRoots(beta.init, eq.func, d.eq.func = NULL, arg.list, ...)
 	}
 }
 \author{
-Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
-}
-\seealso{
-\code{\link{nleqslv}} in package \pkg{nleqslv}.
+Johan Zetterqvist, Arvid \enc{Sjolander}{Sjolander}
 }
 \keyword{optimize}

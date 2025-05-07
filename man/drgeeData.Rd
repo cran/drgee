@@ -4,10 +4,7 @@
 \alias{summary.drgeeData}
 \alias{print.summary.drgeeData}
 \alias{drgeeData}
-
-\title{
-  Extracting Variables and Model Matrices for Generalized Estimating equations
-}
+\title{Extracting Variables and Model Matrices for Generalized Estimating equations}
 \description{
   Given a main model, an outcome nuisance model and an
   exposure nuisance model \code{drgeeData} extracts the model
@@ -166,10 +163,10 @@ drgeeData(outcome, exposure,
 
 }
 \author{
-  Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
+  Johan Zetterqvist, Arvid \enc{Sjolander}{Sjolander}
 }
 \seealso{
-\code{\link{drgee}}, \code{\link{gee}}, \code{\link{model.frame}} and \code{\link{model.matrix}}.
+\code{\link{drgee}} and \code{\link{gee}}.
 }
 \keyword{models}
 \keyword{regression}

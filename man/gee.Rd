@@ -115,7 +115,7 @@ clusterid, clusterid.vcov, rootFinder = findRoots, ...)
   \code{glm}
 }
 \author{
-  Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
+  Johan Zetterqvist, Arvid \enc{Sj?lander}{Sjolander}
 }
 \keyword{models}
 \keyword{regression}

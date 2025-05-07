@@ -1,10 +1,7 @@
 \encoding{latin1}
 \name{getScoreResidualsFromClogit}
 \alias{getScoreResidualsFromClogit}
-
-\title{
-Get the (conditional) score residuals from conditional logistic regression
-}
+\title{Get the (conditional) score residuals from conditional logistic regression}
 \description{
   A function to obtain the conditional score residuals from conditional
   logistic regression as well as the sum of derivatives of these
@@ -64,7 +61,7 @@ getScoreResidualsFromClogit(fit, coefs, y, x, id)
 }
 
 \author{
-Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander}
+Johan Zetterqvist, Arvid \enc{Sj?lander}{Sjolander}
 }
 
 \seealso{

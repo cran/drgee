@@ -2,16 +2,13 @@
 \name{drgee-package}
 \alias{drgee-package}
 \docType{package}
-\title{
-Doubly Robust Generalized Estimating Equations
-}
+\title{Doubly Robust Generalized Estimating Equations package}
 \description{
   The main function is \code{drgee}, which estimates a parameter
   \eqn{\beta}{beta} in a model defined as
-  \eqn{g\{E(Y|A,L)\}-g\{E(Y|A=0,L)\}=\beta^T \{A\cdot X(L)\}}{g\{E(Y|A,L)\}-g\{E(Y|A=0,L)\}=beta^T
-    (A * X(L))\}}. By supplying (nuisance) models for
+  \eqn{g\{E(Y|A,L)\}-g\{E(Y|A=0,L)\}=\beta^T \{A\cdot X(L)\}}. By supplying (nuisance) models for
   \eqn{g\{E(Y|A=0,L)}
-  and \eqn{E(A|L)}, a consistent estimate of \eqn{\beta}{beta} is
+  and \eqn{E(A|L)}, a consistent estimate of \eqn{\beta} is
   obtained when at least one of these models is correctly specified.
 
   In the function \code{drgee}, three estimation methods are
@@ -37,8 +34,9 @@ Doubly Robust Generalized Estimating Equations
   The function \code{findRoots} solves a system of non linear equations.
 }
 \author{
-Johan Zetterqvist, Arvid \enc{Sjölander}{Sjolander} with contributions from Alexander Ploner.
+Johan Zetterqvist, Arvid \enc{Sjolander}{Sjolander} with contributions from Alexander Ploner.
 }
 \keyword{models}
 \keyword{regression}
 \keyword{cluster}
+\keyword{doubly robust}
